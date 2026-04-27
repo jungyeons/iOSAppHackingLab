@@ -17,8 +17,12 @@ struct iOSAppHackingLabApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(labStore)
+                #if os(macOS)
                 .frame(minWidth: 1040, minHeight: 720)
+                #endif
         }
+        #if os(macOS)
         .windowStyle(.titleBar)
+        #endif
     }
 }

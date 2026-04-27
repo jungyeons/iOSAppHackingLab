@@ -2,6 +2,8 @@ import Foundation
 
 #if os(macOS)
 import AppKit
+#elseif os(iOS)
+import UIKit
 #endif
 
 final class LabStore: ObservableObject {
@@ -118,6 +120,8 @@ final class LabStore: ObservableObject {
         #if os(macOS)
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(report, forType: .string)
+        #elseif os(iOS)
+        UIPasteboard.general.string = report
         #endif
     }
 
@@ -213,7 +217,7 @@ final class LabStore: ObservableObject {
         NSLog("DEBUG LOGIN token=%@", token)
         console = """
         Login succeeded.
-        A sensitive token was also written to the macOS Console via NSLog.
+        A sensitive token was also written to the system log via NSLog.
         token=\(token)
         """
     }

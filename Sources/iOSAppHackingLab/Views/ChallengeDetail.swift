@@ -90,7 +90,7 @@ struct ChallengeDetail: View {
                         .frame(minHeight: 130)
                         .padding(8)
                         .scrollContentBackground(.hidden)
-                        .background(Color(nsColor: .textBackgroundColor))
+                        .background(Color.labTextBackground)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
 
@@ -118,6 +118,6 @@ struct ChallengeDetail: View {
             .padding(28)
             .frame(maxWidth: 900, alignment: .leading)
         }
-        .background(Color(nsColor: .windowBackgroundColor))
+        .background(Color.labWindowBackground)
     }
 }

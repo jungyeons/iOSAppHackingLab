@@ -1,5 +1,11 @@
 import SwiftUI
 
+#if os(iOS)
+import UIKit
+#elseif os(macOS)
+import AppKit
+#endif
+
 struct LabSection<Content: View>: View {
     let title: String
     let systemImage: String
@@ -47,7 +53,7 @@ struct ConsoleOutput: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, minHeight: minHeight, alignment: .topLeading)
-        .background(Color(nsColor: .textBackgroundColor))
+        .background(Color.labTextBackground)
         .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 }
@@ -64,5 +70,23 @@ struct StatusPill: View {
             .background(Color.accentColor.opacity(0.14))
             .foregroundStyle(Color.accentColor)
             .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+}
+
+extension Color {
+    static var labTextBackground: Color {
+        #if os(macOS)
+        Color(nsColor: .textBackgroundColor)
+        #else
+        Color(uiColor: .secondarySystemBackground)
+        #endif
+    }
+
+    static var labWindowBackground: Color {
+        #if os(macOS)
+        Color(nsColor: .windowBackgroundColor)
+        #else
+        Color(uiColor: .systemBackground)
+        #endif
     }
 }

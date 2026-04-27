@@ -8,12 +8,28 @@ Public portfolio repository: https://github.com/jungyeons/iOSAppHackingLab
 
 ## 실행
 
+### Swift Package
+
 ```bash
 cd /Users/jungyeons/Documents/Projects/AppWhitehackLab
 swift run
 ```
 
-현재는 Xcode 없이도 빌드 가능한 Swift Package 형태의 macOS SwiftUI 앱입니다. Xcode가 설치되면 같은 학습 흐름을 iOS Simulator 타깃으로 확장할 수 있습니다.
+### Xcode iOS Simulator
+
+```bash
+open iOSAppHackingLab.xcodeproj
+xcodebuild -project iOSAppHackingLab.xcodeproj \
+  -scheme iOSAppHackingLab \
+  -configuration Debug \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=latest' \
+  -derivedDataPath .build/XcodeDerivedData \
+  CODE_SIGNING_ALLOWED=NO build
+```
+
+The same SwiftUI lab runs as a Swift Package app on macOS and as a native Xcode app target on iOS Simulator.
+
+![iOS Simulator screenshot](artifacts/ios-simulator-home.png)
 
 ## 현재 기능
 
@@ -26,6 +42,7 @@ swift run
 - 증거 캡처 체크리스트와 포트폴리오용 takeaway 정리
 - `--self-check` 내장 검증 모드
 - GitHub Actions 기반 self-check CI
+- Xcode 기반 iOS Simulator 타깃
 
 ## 포함된 랩
 
@@ -42,6 +59,8 @@ Sources/iOSAppHackingLab/
   Store/         진행률, 노트, 취약 동작, 리포트 생성
   Security/      Keychain 비교 구현
   Views/         SwiftUI 화면과 랩별 액션 UI
+iOSAppHackingLab.xcodeproj/
+  xcshareddata/  공유 Xcode scheme
 docs/
   ARCHITECTURE.md
   LEARNING_ROADMAP.md
@@ -62,6 +81,7 @@ docs/
 rg "lab\\.|weakKey|NSLog" .
 swift run
 swift run iOSAppHackingLab --self-check
+xcrun simctl list devices available
 ```
 
 ## 안전 범위
@@ -70,6 +90,5 @@ swift run iOSAppHackingLab --self-check
 
 ## 다음 단계
 
-- Xcode 기반 iOS 시뮬레이터 타깃 추가
 - Frida/LLDB 관찰용 심화 랩 추가
-- 샘플 스크린샷과 포트폴리오용 프로젝트 설명 보강
+- 추가 랩 상태별 스크린샷과 짧은 데모 GIF 보강

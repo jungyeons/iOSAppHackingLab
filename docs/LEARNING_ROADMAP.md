@@ -18,10 +18,10 @@ This roadmap keeps the project useful as a portfolio artifact while staying insi
 
 ## Milestone 3: iOS Simulator Target
 
-- Add an Xcode project or generated project file.
-- Run the same labs on iOS Simulator.
-- Add screenshots for each lab state.
-- Document simulator-specific storage inspection paths.
+- [x] Add an Xcode project or generated project file.
+- [x] Run the same labs on iOS Simulator.
+- [x] Add an initial Simulator screenshot.
+- [ ] Document simulator-specific storage inspection paths.
 
 ## Milestone 4: Instrumentation Practice
 
@@ -33,6 +33,7 @@ This roadmap keeps the project useful as a portfolio artifact while staying insi
 
 - [x] Add a local validation command.
 - [x] Add GitHub Actions self-check CI.
-- [ ] Add screenshots and a short demo GIF.
+- [x] Add an initial screenshot.
+- [ ] Add a short demo GIF.
 - [ ] Keep generated study reports in a private notes folder or a sanitized sample.
 - [ ] Add GitHub topics such as `swift`, `swiftui`, `ios-security`, and `security-lab`.

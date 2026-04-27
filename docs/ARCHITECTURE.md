@@ -1,6 +1,6 @@
 # Architecture
 
-iOSAppHackingLab is a Swift Package that builds a SwiftUI app without requiring a full Xcode project.
+iOSAppHackingLab shares one SwiftUI codebase between a Swift Package macOS app and a native Xcode iOS Simulator target.
 
 ## Layers
 
@@ -9,6 +9,7 @@ iOSAppHackingLab is a Swift Package that builds a SwiftUI app without requiring 
 - `Security`: platform API wrappers and helpers used for safer comparisons, such as Keychain storage and redacted logging.
 - `SelfCheck`: command-line validation for core redaction and report-generation behavior.
 - `Views`: SwiftUI navigation, lab detail pages, reusable sections, and lab action panels.
+- `iOSAppHackingLab.xcodeproj`: native iOS app target and shared scheme for Simulator builds.
 
 ## Data Flow
 
@@ -17,6 +18,7 @@ iOSAppHackingLab is a Swift Package that builds a SwiftUI app without requiring 
 3. Lab action views call methods on `LabStore`.
 4. `LabStore` performs intentionally weak local behavior, records console-style output, persists notes/progress in `UserDefaults`, and generates a Markdown study report.
 5. `swift run iOSAppHackingLab --self-check` runs isolated checks without launching the app window.
+6. `xcodebuild` builds the same Swift sources into `iOSAppHackingLab.app` for iOS Simulator.
 
 ## Persistence
 
@@ -28,4 +30,6 @@ iOSAppHackingLab is a Swift Package that builds a SwiftUI app without requiring 
 
 ## Current Platform Shape
 
-The package currently targets macOS so it can build with the installed command line tools. The UI and store are intentionally kept small and data-driven so the same lab model can later be reused from an Xcode iOS Simulator target.
+- Swift Package: quick local macOS runs and self-check validation.
+- Xcode project: iOS Simulator app target with generated Info.plist and shared scheme.
+- Verified simulator: iPhone 17 Pro running iOS 26.4.1.
