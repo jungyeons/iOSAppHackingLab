@@ -3,17 +3,17 @@
 import PackageDescription
 
 let package = Package(
-    name: "AppWhitehackLab",
+    name: "iOSAppHackingLab",
     platforms: [
         .macOS(.v14)
     ],
     products: [
-        .executable(name: "AppWhitehackLab", targets: ["AppWhitehackLab"])
+        .executable(name: "iOSAppHackingLab", targets: ["iOSAppHackingLab"])
     ],
     targets: [
         .executableTarget(
-            name: "AppWhitehackLab",
-            path: "Sources/AppWhitehackLab"
+            name: "iOSAppHackingLab",
+            path: "Sources/iOSAppHackingLab"
         )
     ]
 )

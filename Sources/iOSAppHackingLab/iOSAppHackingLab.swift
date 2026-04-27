@@ -2,7 +2,7 @@ import SwiftUI
 import Foundation
 
 @main
-struct AppWhitehackLabApp: App {
+struct iOSAppHackingLabApp: App {
     @StateObject private var labStore = LabStore()
 
     var body: some Scene {
@@ -31,7 +31,7 @@ struct ContentView: View {
                 }
                 .padding(.vertical, 6)
             }
-            .navigationTitle("Swift Lab")
+            .navigationTitle("iOS App Hacking Lab")
         } detail: {
             if let challenge = LabChallenge.seed.first(where: { $0.id == selection }) {
                 ChallengeDetail(challenge: challenge)
