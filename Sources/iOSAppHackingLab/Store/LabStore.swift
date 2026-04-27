@@ -114,6 +114,48 @@ final class LabStore: ObservableObject {
         """
     }
 
+    func saveKeychainCredentials(username: String, password: String) {
+        switch KeychainService.savePassword(password, account: username) {
+        case .success:
+            console = """
+            Saved password to Keychain.
+            account=\(username)
+
+            Safer pattern: credentials are stored through the platform Keychain API instead of UserDefaults.
+            """
+        case .failure(let error):
+            console = """
+            Failed to save password to Keychain.
+            account=\(username)
+            error=\(error.message)
+            """
+        }
+    }
+
+    func revealKeychainCredentials(username: String) {
+        switch KeychainService.readPassword(account: username) {
+        case .success(.some(let password)):
+            console = """
+            Read password from Keychain.
+            account=\(username)
+            password=\(password)
+
+            Lab note: the app can retrieve the secret, but it is not stored in plain UserDefaults.
+            """
+        case .success(.none):
+            console = """
+            No Keychain password found for account:
+            \(username)
+            """
+        case .failure(let error):
+            console = """
+            Failed to read password from Keychain.
+            account=\(username)
+            error=\(error.message)
+            """
+        }
+    }
+
     func encodeWithWeakKey(_ message: String) {
         let encoded = message.utf8.map { $0 ^ weakKey }
         lastPayload = Data(encoded).base64EncodedString()

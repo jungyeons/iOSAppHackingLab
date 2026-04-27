@@ -15,10 +15,11 @@ swift run
 - 랩별 학습 노트 저장
 - 취약 패턴과 안전한 구현 패턴 비교
 - Markdown 학습 리포트 생성
+- UserDefaults와 Keychain 저장 방식 비교
 
 ## 포함된 랩
 
-- Insecure Local Storage: `UserDefaults`에 평문 계정 정보 저장
+- Insecure Local Storage: `UserDefaults` 평문 저장과 Keychain 저장 비교
 - Weak Static Secret: 하드코딩된 XOR 키로 payload 인코딩
 - Sensitive Debug Logging: 민감한 토큰을 `NSLog`로 출력
 - Tamperable Entitlement: 로컬 boolean 값을 권한처럼 신뢰
@@ -39,7 +40,6 @@ swift run
 
 ## 다음 단계
 
-- Keychain 기반 안전 저장 예시 추가
 - Xcode 기반 iOS 시뮬레이터 타깃 추가
 - Frida/LLDB 관찰용 심화 랩 추가
 - 샘플 스크린샷과 포트폴리오용 프로젝트 설명 보강

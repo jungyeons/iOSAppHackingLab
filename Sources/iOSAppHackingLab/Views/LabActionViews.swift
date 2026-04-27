@@ -40,6 +40,20 @@ struct InsecureStorageLab: View {
                 }
             }
 
+            Divider()
+
+            Text("Safer comparison")
+                .font(.headline)
+
+            HStack {
+                Button("Save Password to Keychain") {
+                    labStore.saveKeychainCredentials(username: username, password: password)
+                }
+                Button("Read Keychain Password") {
+                    labStore.revealKeychainCredentials(username: username)
+                }
+            }
+
             ConsoleOutput(text: labStore.console)
         }
     }
