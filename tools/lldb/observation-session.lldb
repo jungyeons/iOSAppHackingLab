@@ -1,0 +1,6 @@
+process attach --name iOSAppHackingLab
+image lookup -rn 'LabObservationProbe|runRuntimeObservation'
+breakpoint set --func-regex 'LabObservationProbe.*startObservation'
+breakpoint set --func-regex 'LabObservationProbe.*recordCheckpoint'
+breakpoint set --func-regex 'LabObservationProbe.*finishObservation'
+continue

@@ -46,7 +46,11 @@ struct ConsoleOutput: View {
     var body: some View {
         ScrollView {
             Text(text.isEmpty ? "Console output appears here." : text)
+                #if os(iOS)
+                .font(.system(size: 13, design: .monospaced))
+                #else
                 .font(.system(.body, design: .monospaced))
+                #endif
                 .foregroundStyle(text.isEmpty ? .secondary : .primary)
                 .frame(maxWidth: .infinity, alignment: .topLeading)
                 .textSelection(.enabled)

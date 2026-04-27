@@ -12,8 +12,9 @@ struct ChallengeDetail: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 22) {
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(alignment: .leading, spacing: 22) {
                 VStack(alignment: .leading, spacing: 10) {
                     HStack(alignment: .firstTextBaseline) {
                         Text(challenge.title)
@@ -59,6 +60,7 @@ struct ChallengeDetail: View {
                 }
 
                 LabConsole(challenge: challenge)
+                    .id("lab-actions")
 
                 LabSection(title: "What To Inspect", systemImage: "magnifyingglass") {
                     BulletList(items: challenge.inspectHints, systemImage: "magnifyingglass")
@@ -117,6 +119,18 @@ struct ChallengeDetail: View {
             }
             .padding(28)
             .frame(maxWidth: 900, alignment: .leading)
+            }
+            .onAppear {
+                guard AppLaunchOptions.shouldFocusDemoOutput else {
+                    return
+                }
+
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        proxy.scrollTo("lab-actions", anchor: .top)
+                    }
+                }
+            }
         }
         .background(Color.labWindowBackground)
     }

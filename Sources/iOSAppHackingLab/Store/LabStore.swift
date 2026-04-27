@@ -17,12 +17,14 @@ final class LabStore: ObservableObject {
     private let weakKey: UInt8 = 0x42
     private let progressKey = "lab.progress.completedChallengeIDs"
     private let notesKey = "lab.progress.notes"
+    private let observationProbe = LabObservationProbe.shared
     private var lastPayload = ""
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         completedChallengeIDs = Set(defaults.stringArray(forKey: progressKey) ?? [])
         notes = defaults.dictionary(forKey: notesKey) as? [String: String] ?? [:]
+        applyLaunchDemoIfNeeded()
     }
 
     func completedCount(in challenges: [LabChallenge]) -> Int {
@@ -252,11 +254,125 @@ final class LabStore: ObservableObject {
         """
     }
 
+    func runRuntimeObservation(account: String) {
+        let normalizedAccount = account.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            ? "student@example.com"
+            : account
+        let token = "lab-observe-\(UUID().uuidString)"
+        let startEvent = observationProbe.startObservation(account: normalizedAccount, token: token)
+        let checkpointEvent = observationProbe.recordCheckpoint(label: "premium-evaluation", secret: token)
+        let finishEvent = observationProbe.finishObservation(result: isPremiumEnabled ? "premium-visible" : "standard-visible")
+
+        console = """
+        Runtime observation scenario completed.
+        Target bundle: com.jungyeons.iosapphackinglab
+        Probe class: LabObservationProbe
+
+        Events:
+        \(startEvent)
+        \(checkpointEvent)
+        \(finishEvent)
+
+        Lab note: a raw token existed in process memory for this local scenario. Capture redacted metadata, source location, and breakpoint evidence instead of publishing raw secrets.
+        """
+    }
+
+    func showLLDBObservationGuide() {
+        console = """
+        LLDB observation guide for this lab binary only.
+
+        1. Build and launch the iOS Simulator target.
+        2. Attach to this simulator app:
+           lldb
+           (lldb) process attach --name iOSAppHackingLab
+        3. Explore the lab-only symbols:
+           (lldb) image lookup -rn 'LabObservationProbe|runRuntimeObservation'
+        4. Set observation breakpoints:
+           (lldb) breakpoint set --func-regex 'LabObservationProbe.*startObservation'
+           (lldb) breakpoint set --func-regex 'LabObservationProbe.*recordCheckpoint'
+           (lldb) breakpoint set --func-regex 'LabObservationProbe.*finishObservation'
+        5. Return to the app and press Run Observation Scenario.
+        6. Capture breakpoint hits and redacted app output.
+
+        Scope rule: use this against com.jungyeons.iosapphackinglab only.
+        """
+    }
+
+    func showFridaObservationGuide() {
+        console = """
+        Frida observer for this lab binary only.
+
+        Script:
+        tools/frida/observe-lab-state.js
+
+        Simulator flow, after installing Frida separately:
+        frida-ps | rg iOSAppHackingLab
+        frida -n iOSAppHackingLab -l tools/frida/observe-lab-state.js
+
+        Then press Run Observation Scenario in the app.
+
+        The script observes LabObservationProbe selectors and logs method names plus redacted metadata. It does not change return values, bypass checks, or target any third-party app.
+        """
+    }
+
     private func persistProgress() {
         defaults.set(Array(completedChallengeIDs).sorted(), forKey: progressKey)
     }
 
     private func persistNotes() {
         defaults.set(notes, forKey: notesKey)
+    }
+
+    private func applyLaunchDemoIfNeeded() {
+        guard let mode = AppLaunchOptions.demoMode else {
+            return
+        }
+
+        switch mode {
+        case "runtime-run":
+            runRuntimeObservation(account: "demo@example.com")
+        case "runtime-lldb":
+            showLLDBObservationGuide()
+        case "runtime-frida":
+            showFridaObservationGuide()
+        default:
+            break
+        }
+    }
+}
+
+@objc(LabObservationProbe)
+@objcMembers
+final class LabObservationProbe: NSObject {
+    static let shared = LabObservationProbe()
+
+    private override init() {}
+
+    @objc(startObservationWithAccount:token:)
+    dynamic func startObservation(account: String, token: String) -> String {
+        "probe=start selector=startObservationWithAccount:token: accountHash=\(fingerprint(account)) token=\(redact(token))"
+    }
+
+    @objc(recordCheckpointWithLabel:secret:)
+    dynamic func recordCheckpoint(label: String, secret: String) -> String {
+        "probe=checkpoint selector=recordCheckpointWithLabel:secret: label=\(label) secret=\(redact(secret))"
+    }
+
+    @objc(finishObservationWithResult:)
+    dynamic func finishObservation(result: String) -> String {
+        "probe=finish selector=finishObservationWithResult: result=\(result)"
+    }
+
+    private func redact(_ value: String) -> String {
+        "<redacted:\(value.count)-chars>"
+    }
+
+    private func fingerprint(_ value: String) -> String {
+        var hash: UInt64 = 1_469_598_103_934_665_603
+        for byte in value.utf8 {
+            hash ^= UInt64(byte)
+            hash = hash &* 1_099_511_628_211
+        }
+        return String(format: "%016llx", hash)
     }
 }

@@ -2,7 +2,15 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject private var labStore: LabStore
-    @State private var selection: LabChallenge.ID? = LabChallenge.seed.first?.id
+    @State private var selection: LabChallenge.ID?
+
+    init() {
+        let requestedLabID = AppLaunchOptions.initialLabID
+        let initialLabID = LabChallenge.seed.contains { $0.id == requestedLabID }
+            ? requestedLabID
+            : LabChallenge.seed.first?.id
+        _selection = State(initialValue: initialLabID)
+    }
 
     var body: some View {
         NavigationSplitView {

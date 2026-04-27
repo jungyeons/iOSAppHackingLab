@@ -1,6 +1,34 @@
 import Darwin
 import SwiftUI
 
+enum AppLaunchOptions {
+    static var initialLabID: String? {
+        value(after: "--lab")
+    }
+
+    static var demoMode: String? {
+        value(after: "--demo")
+    }
+
+    static var shouldFocusDemoOutput: Bool {
+        demoMode != nil
+    }
+
+    private static func value(after flag: String) -> String? {
+        let arguments = CommandLine.arguments
+        guard let index = arguments.firstIndex(of: flag) else {
+            return nil
+        }
+
+        let valueIndex = arguments.index(after: index)
+        guard valueIndex < arguments.endIndex else {
+            return nil
+        }
+
+        return arguments[valueIndex]
+    }
+}
+
 @main
 struct iOSAppHackingLabApp: App {
     @StateObject private var labStore = LabStore()

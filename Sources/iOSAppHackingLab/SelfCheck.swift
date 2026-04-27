@@ -10,6 +10,7 @@ enum SelfCheck {
         var failures: [String] = []
 
         checkRedaction(failures: &failures)
+        checkObservationProbe(failures: &failures)
         checkReportGeneration(failures: &failures)
 
         if failures.isEmpty {
@@ -66,6 +67,24 @@ enum SelfCheck {
         expect(store.report.contains("Evidence to capture:"), "Report is missing evidence prompts.", failures: &failures)
         expect(store.report.contains("Found plaintext UserDefaults keys."), "Report is missing saved notes.", failures: &failures)
         expect(store.report.contains("Out of scope: real user data"), "Report is missing the safety boundary.", failures: &failures)
+    }
+
+    private static func checkObservationProbe(failures: inout [String]) {
+        let account = "student@example.com"
+        let token = "lab-token-super-secret"
+        let probe = LabObservationProbe.shared
+        let startEvent = probe.startObservation(account: account, token: token)
+        let checkpointEvent = probe.recordCheckpoint(label: "self-check", secret: token)
+        let finishEvent = probe.finishObservation(result: "ok")
+
+        expect(startEvent.contains("LabObservationProbe") == false, "Probe event should stay compact and event-focused.", failures: &failures)
+        expect(startEvent.contains("accountHash="), "Probe start event is missing the account fingerprint.", failures: &failures)
+        expect(startEvent.contains("<redacted:22-chars>"), "Probe start event is missing the redacted token length.", failures: &failures)
+        expect(!startEvent.contains(account), "Probe start event contains the raw account.", failures: &failures)
+        expect(!startEvent.contains(token), "Probe start event contains the raw token.", failures: &failures)
+        expect(checkpointEvent.contains("label=self-check"), "Probe checkpoint event is missing its label.", failures: &failures)
+        expect(!checkpointEvent.contains(token), "Probe checkpoint event contains the raw token.", failures: &failures)
+        expect(finishEvent.contains("result=ok"), "Probe finish event is missing its result.", failures: &failures)
     }
 
     private static func expect(_ condition: Bool, _ message: String, failures: inout [String]) {

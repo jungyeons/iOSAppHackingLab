@@ -25,15 +25,16 @@ This roadmap keeps the project useful as a portfolio artifact while staying insi
 
 ## Milestone 4: Instrumentation Practice
 
-- Add local-only observation exercises for LLDB.
-- Add Frida notes only for this lab binary and simulator build.
-- Compare source-level findings with runtime observations.
+- [x] Add local-only observation exercises for LLDB.
+- [x] Add Frida notes only for this lab binary and simulator build.
+- [x] Compare source-level findings with runtime observations.
 
 ## Milestone 5: Portfolio Polish
 
 - [x] Add a local validation command.
 - [x] Add GitHub Actions self-check CI.
 - [x] Add an initial screenshot.
-- [ ] Add a short demo GIF.
+- [x] Add lab-state screenshots.
+- [x] Add a short demo GIF.
 - [ ] Keep generated study reports in a private notes folder or a sanitized sample.
 - [ ] Add GitHub topics such as `swift`, `swiftui`, `ios-security`, and `security-lab`.

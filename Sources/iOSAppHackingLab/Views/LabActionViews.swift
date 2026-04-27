@@ -14,6 +14,8 @@ struct LabConsole: View {
                 VerboseLoggingLab()
             case .tamperableState:
                 TamperableStateLab()
+            case .runtimeObservation:
+                RuntimeObservationLab()
             }
         }
     }
@@ -133,6 +135,45 @@ struct TamperableStateLab: View {
             }
 
             ConsoleOutput(text: labStore.console)
+        }
+    }
+}
+
+struct RuntimeObservationLab: View {
+    @EnvironmentObject private var labStore: LabStore
+    @State private var account = "student@example.com"
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label("com.jungyeons.iosapphackinglab", systemImage: "iphone.gen3")
+                .font(.callout.monospaced())
+                .foregroundStyle(.secondary)
+
+            TextField("Lab account", text: $account)
+                .textFieldStyle(.roundedBorder)
+
+            VStack(alignment: .leading, spacing: 10) {
+                Button {
+                    labStore.runRuntimeObservation(account: account)
+                } label: {
+                    Label("Run Observation Scenario", systemImage: "record.circle")
+                }
+
+                Button {
+                    labStore.showLLDBObservationGuide()
+                } label: {
+                    Label("Show LLDB Guide", systemImage: "terminal")
+                }
+
+                Button {
+                    labStore.showFridaObservationGuide()
+                } label: {
+                    Label("Show Frida Observer", systemImage: "dot.radiowaves.left.and.right")
+                }
+            }
+            .buttonStyle(.bordered)
+
+            ConsoleOutput(text: labStore.console, minHeight: 190)
         }
     }
 }

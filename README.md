@@ -31,6 +31,12 @@ The same SwiftUI lab runs as a Swift Package app on macOS and as a native Xcode 
 
 ![iOS Simulator screenshot](artifacts/ios-simulator-home.png)
 
+![Runtime observation demo](artifacts/ios-simulator-runtime-demo.gif)
+
+| Runtime run | LLDB guide | Frida observer |
+| --- | --- | --- |
+| ![Runtime run](artifacts/ios-simulator-runtime-run.png) | ![LLDB guide](artifacts/ios-simulator-runtime-lldb.png) | ![Frida observer](artifacts/ios-simulator-runtime-frida.png) |
+
 ## 현재 기능
 
 - 랩별 진행률 체크
@@ -43,6 +49,8 @@ The same SwiftUI lab runs as a Swift Package app on macOS and as a native Xcode 
 - `--self-check` 내장 검증 모드
 - GitHub Actions 기반 self-check CI
 - Xcode 기반 iOS Simulator 타깃
+- LLDB/Frida 관찰용 lab-only runtime probe
+- 시뮬레이터 스크린샷과 짧은 demo GIF
 
 ## 포함된 랩
 
@@ -50,6 +58,7 @@ The same SwiftUI lab runs as a Swift Package app on macOS and as a native Xcode 
 - Weak Static Secret: 하드코딩된 XOR 키로 payload 인코딩
 - Sensitive Debug Logging: 민감한 토큰 로그와 redacted 로그 비교
 - Tamperable Entitlement: 로컬 boolean 값을 권한처럼 신뢰
+- Runtime Observation Drill: LLDB/Frida로 이 앱의 lab-only probe 관찰
 
 ## 프로젝트 구조
 
@@ -63,8 +72,13 @@ iOSAppHackingLab.xcodeproj/
   xcshareddata/  공유 Xcode scheme
 docs/
   ARCHITECTURE.md
+  INSTRUMENTATION.md
   LEARNING_ROADMAP.md
   SECURITY_SCOPE.md
+tools/
+  frida/        Lab-only Frida observer
+  lldb/         Lab-only LLDB command file
+  make-demo-gif.swift
 ```
 
 ## 연습 순서
@@ -79,16 +93,22 @@ docs/
 
 ```bash
 rg "lab\\.|weakKey|NSLog" .
+rg "LabObservationProbe|runRuntimeObservation" .
 swift run
 swift run iOSAppHackingLab --self-check
 xcrun simctl list devices available
+swift tools/make-demo-gif.swift artifacts/ios-simulator-runtime-demo.gif \
+  artifacts/ios-simulator-runtime-run.png \
+  artifacts/ios-simulator-runtime-lldb.png \
+  artifacts/ios-simulator-runtime-frida.png
 ```
 
 ## 안전 범위
 
-이 저장소는 로컬 학습용입니다. 타인 앱, 실서비스, 실제 사용자 데이터, 권한이 없는 기기나 계정은 범위 밖입니다. 자세한 범위는 `docs/SECURITY_SCOPE.md`에 정리했습니다.
+이 저장소는 로컬 학습용입니다. 타인 앱, 실서비스, 실제 사용자 데이터, 권한이 없는 기기나 계정은 범위 밖입니다. Frida/LLDB 자료도 이 앱의 simulator build만 대상으로 합니다. 자세한 범위는 `docs/SECURITY_SCOPE.md`에 정리했습니다.
 
 ## 다음 단계
 
-- Frida/LLDB 관찰용 심화 랩 추가
-- 추가 랩 상태별 스크린샷과 짧은 데모 GIF 보강
+- Simulator storage inspection path 문서화
+- Server-authoritative entitlement model 예시 추가
+- Sanitized sample study report 추가

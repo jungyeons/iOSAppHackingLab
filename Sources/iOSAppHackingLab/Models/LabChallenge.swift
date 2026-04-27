@@ -6,6 +6,7 @@ struct LabChallenge: Identifiable, Hashable {
         case weakSecret
         case verboseLogging
         case tamperableState
+        case runtimeObservation
     }
 
     let id: String
@@ -142,6 +143,38 @@ struct LabChallenge: Identifiable, Hashable {
                 "Explained what component should be authoritative for premium access."
             ],
             kind: .tamperableState
+        ),
+        LabChallenge(
+            id: "runtime-observation",
+            title: "Runtime Observation Drill",
+            category: "Instrumentation",
+            difficulty: "Intermediate",
+            summary: "LLDB and Frida observe a lab-only runtime probe without changing app behavior.",
+            objective: "Compare source-level findings with runtime evidence while keeping all instrumentation scoped to this simulator app.",
+            attackSurface: "Runtime instrumentation",
+            risk: "Runtime tools can reveal control flow and in-memory values when secrets are present. The defensive skill is to gather useful evidence while staying authorized, scoped, and careful about redaction.",
+            practice: "Run the observation scenario, attach LLDB breakpoints or the included Frida observer to this lab binary, and capture probe calls, redacted token metadata, and the matching source path.",
+            inspectHints: [
+                "Search for LabObservationProbe in the source.",
+                "Search for runRuntimeObservation in the source.",
+                "Keep the target limited to bundle com.jungyeons.iosapphackinglab.",
+                "Use tools/frida/observe-lab-state.js only against this lab app."
+            ],
+            evidencePrompts: [
+                "Capture the in-app runtime observation transcript.",
+                "Capture an LLDB breakpoint hit or symbol lookup for LabObservationProbe.",
+                "Capture Frida output showing the probe selector and redacted metadata.",
+                "Write one sentence explaining why observation is not authorization bypass."
+            ],
+            saferPattern: "Use runtime observation for authorized diagnostics, keep secrets out of long-lived client memory when possible, redact evidence before sharing, and document the exact target and scope.",
+            portfolioTakeaway: "Shows that the project goes beyond static code reading into controlled runtime analysis while keeping a clear professional boundary.",
+            completionCriteria: [
+                "Ran the lab-only observation scenario.",
+                "Mapped at least one runtime observation back to the source.",
+                "Captured redacted evidence without publishing raw secrets.",
+                "Confirmed the target was this simulator app only."
+            ],
+            kind: .runtimeObservation
         )
     ]
 }
