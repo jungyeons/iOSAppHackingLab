@@ -9,6 +9,13 @@ cd /Users/jungyeons/Documents/Projects/AppWhitehackLab
 swift run
 ```
 
+## 현재 기능
+
+- 랩별 진행률 체크
+- 랩별 학습 노트 저장
+- 취약 패턴과 안전한 구현 패턴 비교
+- Markdown 학습 리포트 생성
+
 ## 포함된 랩
 
 - Insecure Local Storage: `UserDefaults`에 평문 계정 정보 저장
@@ -35,4 +42,4 @@ swift run
 - Keychain 기반 안전 저장 예시 추가
 - Xcode 기반 iOS 시뮬레이터 타깃 추가
 - Frida/LLDB 관찰용 심화 랩 추가
-- 간단한 체크리스트 리포트 생성 기능 추가
+- 샘플 스크린샷과 포트폴리오용 프로젝트 설명 보강
