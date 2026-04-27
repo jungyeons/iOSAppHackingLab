@@ -25,8 +25,16 @@ iOSAppHackingLab shares one SwiftUI codebase between a Swift Package macOS app a
 - Progress: `UserDefaults` key `lab.progress.completedChallengeIDs`.
 - Notes: `UserDefaults` key `lab.progress.notes`.
 - Vulnerable storage lab: `UserDefaults` keys `lab.username` and `lab.password`.
+- Tamperable entitlement lab: `UserDefaults` key `lab.premium.enabled`.
+- Server-authoritative comparison cache: `UserDefaults` key `lab.premium.serverClaim`.
 - Safer storage comparison: Keychain generic password item under service `iOSAppHackingLab.local-lab`.
 - Safer logging comparison: `RedactingLogger` emits event-style logs without raw account or token values.
+
+## Entitlement Model
+
+The intentionally weak path stores premium access in `lab.premium.enabled`. The safer comparison uses `SimulatedEntitlementAuthority` to model a trusted service response and caches only a display claim in `lab.premium.serverClaim`.
+
+This is a local teaching model, not a real backend. In a production app, the authoritative decision should come from a trusted service, App Store receipt validation, or a cryptographically verifiable claim whose private signing material is not embedded in the app.
 
 ## Current Platform Shape
 

@@ -9,6 +9,7 @@ import UIKit
 final class LabStore: ObservableObject {
     @Published var console = ""
     @Published var isPremiumEnabled = false
+    @Published var serverAuthorizedPremium = false
     @Published var completedChallengeIDs: Set<String> = []
     @Published var notes: [String: String] = [:]
     @Published var report = ""
@@ -17,7 +18,9 @@ final class LabStore: ObservableObject {
     private let weakKey: UInt8 = 0x42
     private let progressKey = "lab.progress.completedChallengeIDs"
     private let notesKey = "lab.progress.notes"
+    private let serverClaimKey = "lab.premium.serverClaim"
     private let observationProbe = LabObservationProbe.shared
+    private let entitlementAuthority = SimulatedEntitlementAuthority()
     private var lastPayload = ""
 
     init(defaults: UserDefaults = .standard) {
@@ -254,6 +257,61 @@ final class LabStore: ObservableObject {
         """
     }
 
+    func requestServerEntitlement(account: String) {
+        let claim = entitlementAuthority.fetchEntitlement(account: account)
+        serverAuthorizedPremium = claim.isPremium
+        defaults.set(claim.cacheValue, forKey: serverClaimKey)
+        console = """
+        Server-authoritative entitlement response:
+        decisionSource=\(claim.decisionSource)
+        accountHash=\(claim.accountHash)
+        plan=\(claim.plan)
+        premium=\(claim.isPremium)
+        claimID=\(claim.claimID)
+
+        Cached display claim:
+        \(serverClaimKey)=\(claim.cacheValue)
+
+        Safer pattern: local UI state can cache the result, but the authoritative decision comes from the trusted service, not from lab.premium.enabled.
+        """
+    }
+
+    func reloadServerEntitlementCache() {
+        let cached = defaults.string(forKey: serverClaimKey) ?? "<missing>"
+        let cachedPremium = entitlementAuthority.cachedPremium(from: cached)
+        if let cachedPremium {
+            serverAuthorizedPremium = cachedPremium
+        }
+
+        console = """
+        Reloaded cached server entitlement:
+        \(serverClaimKey)=\(cached)
+        cachedPremium=\(cachedPremium.map(String.init) ?? "<missing>")
+
+        Lab note: this cache is for display and offline UX. A real app should revalidate with a trusted service or verify a signed platform receipt before granting access.
+        """
+    }
+
+    func attemptLocalEntitlementOverride() {
+        defaults.set(true, forKey: "lab.premium.enabled")
+        let cached = defaults.string(forKey: serverClaimKey) ?? "<missing>"
+        let cachedPremium = entitlementAuthority.cachedPremium(from: cached)
+        if let cachedPremium {
+            serverAuthorizedPremium = cachedPremium
+        }
+
+        console = """
+        Local override attempt:
+        lab.premium.enabled=true
+
+        Server-authoritative decision:
+        \(serverClaimKey)=\(cached)
+        premium=\(serverAuthorizedPremium)
+
+        Result: changing the local boolean does not grant premium in the safer model. The feature decision follows the server claim instead.
+        """
+    }
+
     func runRuntimeObservation(account: String) {
         let normalizedAccount = account.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             ? "student@example.com"
@@ -365,6 +423,67 @@ final class LabObservationProbe: NSObject {
 
     private func redact(_ value: String) -> String {
         "<redacted:\(value.count)-chars>"
+    }
+
+    private func fingerprint(_ value: String) -> String {
+        var hash: UInt64 = 1_469_598_103_934_665_603
+        for byte in value.utf8 {
+            hash ^= UInt64(byte)
+            hash = hash &* 1_099_511_628_211
+        }
+        return String(format: "%016llx", hash)
+    }
+}
+
+struct ServerEntitlementClaim: Equatable {
+    let accountHash: String
+    let plan: String
+    let isPremium: Bool
+    let claimID: String
+    let decisionSource: String
+
+    var cacheValue: String {
+        [
+            "source=\(decisionSource)",
+            "accountHash=\(accountHash)",
+            "plan=\(plan)",
+            "premium=\(isPremium)",
+            "claimID=\(claimID)"
+        ].joined(separator: ";")
+    }
+}
+
+struct SimulatedEntitlementAuthority {
+    private let paidAccounts: Set<String> = [
+        "paid@example.com",
+        "portfolio-reviewer@example.com"
+    ]
+
+    func fetchEntitlement(account: String) -> ServerEntitlementClaim {
+        let normalized = normalize(account)
+        let isPremium = paidAccounts.contains(normalized)
+        let plan = isPremium ? "premium" : "free"
+        return ServerEntitlementClaim(
+            accountHash: fingerprint(normalized),
+            plan: plan,
+            isPremium: isPremium,
+            claimID: "claim-\(fingerprint("\(normalized)|\(plan)"))",
+            decisionSource: "simulated-server-authority"
+        )
+    }
+
+    func cachedPremium(from cacheValue: String) -> Bool? {
+        cacheValue
+            .split(separator: ";")
+            .first { $0.hasPrefix("premium=") }
+            .flatMap { Bool(String($0.dropFirst("premium=".count))) }
+    }
+
+    private func normalize(_ account: String) -> String {
+        let normalized = account
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+        return normalized.isEmpty ? "student@example.com" : normalized
     }
 
     private func fingerprint(_ value: String) -> String {

@@ -11,12 +11,13 @@ enum SelfCheck {
 
         checkRedaction(failures: &failures)
         checkObservationProbe(failures: &failures)
+        checkServerEntitlement(failures: &failures)
         checkReportGeneration(failures: &failures)
 
         if failures.isEmpty {
             return SelfCheckResult(
                 didPass: true,
-                output: "Self-check passed: redaction and report generation are working."
+                output: "Self-check passed: redaction, entitlement authority, observation probe, and report generation are working."
             )
         }
 
@@ -85,6 +86,19 @@ enum SelfCheck {
         expect(checkpointEvent.contains("label=self-check"), "Probe checkpoint event is missing its label.", failures: &failures)
         expect(!checkpointEvent.contains(token), "Probe checkpoint event contains the raw token.", failures: &failures)
         expect(finishEvent.contains("result=ok"), "Probe finish event is missing its result.", failures: &failures)
+    }
+
+    private static func checkServerEntitlement(failures: inout [String]) {
+        let authority = SimulatedEntitlementAuthority()
+        let freeClaim = authority.fetchEntitlement(account: "student@example.com")
+        let paidClaim = authority.fetchEntitlement(account: "paid@example.com")
+
+        expect(!freeClaim.isPremium, "Student account should not be premium in the simulated authority.", failures: &failures)
+        expect(paidClaim.isPremium, "Paid account should be premium in the simulated authority.", failures: &failures)
+        expect(freeClaim.cacheValue.contains("simulated-server-authority"), "Entitlement cache is missing its decision source.", failures: &failures)
+        expect(!paidClaim.cacheValue.contains("paid@example.com"), "Entitlement cache contains the raw account.", failures: &failures)
+        expect(authority.cachedPremium(from: freeClaim.cacheValue) == false, "Free cached entitlement parsed incorrectly.", failures: &failures)
+        expect(authority.cachedPremium(from: paidClaim.cacheValue) == true, "Paid cached entitlement parsed incorrectly.", failures: &failures)
     }
 
     private static func expect(_ condition: Bool, _ message: String, failures: inout [String]) {

@@ -115,11 +115,12 @@ struct VerboseLoggingLab: View {
 
 struct TamperableStateLab: View {
     @EnvironmentObject private var labStore: LabStore
+    @State private var account = "student@example.com"
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Premium enabled")
+                Text("Local premium flag")
                 Spacer()
                 Toggle("", isOn: $labStore.isPremiumEnabled)
                     .labelsHidden()
@@ -133,6 +134,44 @@ struct TamperableStateLab: View {
                     labStore.reloadLocalEntitlement()
                 }
             }
+
+            Divider()
+
+            Text("Safer comparison")
+                .font(.headline)
+
+            TextField("Account", text: $account)
+                .textFieldStyle(.roundedBorder)
+
+            HStack {
+                Text("Server premium")
+                Spacer()
+                Image(systemName: labStore.serverAuthorizedPremium ? "checkmark.seal.fill" : "xmark.seal")
+                    .foregroundStyle(labStore.serverAuthorizedPremium ? .green : .secondary)
+                Text(labStore.serverAuthorizedPremium ? "authorized" : "not authorized")
+                    .foregroundStyle(.secondary)
+            }
+
+            VStack(alignment: .leading, spacing: 10) {
+                Button {
+                    labStore.requestServerEntitlement(account: account)
+                } label: {
+                    Label("Request Server Entitlement", systemImage: "checkmark.shield")
+                }
+
+                Button {
+                    labStore.reloadServerEntitlementCache()
+                } label: {
+                    Label("Reload Cached Server Claim", systemImage: "arrow.clockwise")
+                }
+
+                Button {
+                    labStore.attemptLocalEntitlementOverride()
+                } label: {
+                    Label("Try Local Override", systemImage: "exclamationmark.arrow.triangle.2.circlepath")
+                }
+            }
+            .buttonStyle(.bordered)
 
             ConsoleOutput(text: labStore.console)
         }

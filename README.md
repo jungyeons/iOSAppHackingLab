@@ -45,6 +45,7 @@ The same SwiftUI lab runs as a Swift Package app on macOS and as a native Xcode 
 - Markdown 학습 리포트 생성
 - UserDefaults와 Keychain 저장 방식 비교
 - 민감 로그와 redacted event log 비교
+- 로컬 entitlement와 server-authoritative 모델 비교
 - 증거 캡처 체크리스트와 포트폴리오용 takeaway 정리
 - `--self-check` 내장 검증 모드
 - GitHub Actions 기반 self-check CI
@@ -57,7 +58,7 @@ The same SwiftUI lab runs as a Swift Package app on macOS and as a native Xcode 
 - Insecure Local Storage: `UserDefaults` 평문 저장과 Keychain 저장 비교
 - Weak Static Secret: 하드코딩된 XOR 키로 payload 인코딩
 - Sensitive Debug Logging: 민감한 토큰 로그와 redacted 로그 비교
-- Tamperable Entitlement: 로컬 boolean 값을 권한처럼 신뢰
+- Tamperable Entitlement: 로컬 boolean 권한과 server-authoritative claim 비교
 - Runtime Observation Drill: LLDB/Frida로 이 앱의 lab-only probe 관찰
 
 ## 프로젝트 구조
@@ -74,7 +75,9 @@ docs/
   ARCHITECTURE.md
   INSTRUMENTATION.md
   LEARNING_ROADMAP.md
+  SAMPLE_STUDY_REPORT.md
   SECURITY_SCOPE.md
+  SIMULATOR_STORAGE.md
 tools/
   frida/        Lab-only Frida observer
   lldb/         Lab-only LLDB command file
@@ -94,6 +97,7 @@ tools/
 ```bash
 rg "lab\\.|weakKey|NSLog" .
 rg "LabObservationProbe|runRuntimeObservation" .
+rg "lab.premium.serverClaim|SimulatedEntitlementAuthority" .
 swift run
 swift run iOSAppHackingLab --self-check
 xcrun simctl list devices available
@@ -107,8 +111,14 @@ swift tools/make-demo-gif.swift artifacts/ios-simulator-runtime-demo.gif \
 
 이 저장소는 로컬 학습용입니다. 타인 앱, 실서비스, 실제 사용자 데이터, 권한이 없는 기기나 계정은 범위 밖입니다. Frida/LLDB 자료도 이 앱의 simulator build만 대상으로 합니다. 자세한 범위는 `docs/SECURITY_SCOPE.md`에 정리했습니다.
 
+## 문서
+
+- [Simulator storage inspection](docs/SIMULATOR_STORAGE.md)
+- [Runtime instrumentation lab](docs/INSTRUMENTATION.md)
+- [Sanitized sample study report](docs/SAMPLE_STUDY_REPORT.md)
+
 ## 다음 단계
 
-- Simulator storage inspection path 문서화
-- Server-authoritative entitlement model 예시 추가
-- Sanitized sample study report 추가
+- GitHub topics 추가
+- Server-authoritative entitlement 예시 스크린샷 보강
+- Sanitized report를 앱에서 export하는 흐름 추가
