@@ -1,0 +1,114 @@
+# Signed Entitlement API Contract
+
+This document turns the local `SimulatedEntitlementAuthority` into a production-style API contract. It is still a defensive lab example: use it to reason about app authorization boundaries, not to test third-party apps or services.
+
+## Design Goal
+
+The app may cache a claim for offline display, but premium access is granted only when the claim is issued by a trusted server, signed with a server-held private key, scoped to this app, and still inside its validity window.
+
+In production, the private signing key must stay server-side. The app receives only public verification keys.
+
+## Public Key Discovery
+
+```http
+GET /.well-known/iosapphackinglab-entitlement-keys.json
+Accept: application/json
+```
+
+Example response:
+
+```json
+{
+  "issuer": "https://api.example.test",
+  "keys": [
+    {
+      "kid": "entitlement-p256-2026-04",
+      "alg": "ES256",
+      "kty": "EC",
+      "crv": "P-256",
+      "use": "sig",
+      "x": "<base64url-public-x>",
+      "y": "<base64url-public-y>",
+      "expiresAt": "2026-07-01T00:00:00Z"
+    }
+  ]
+}
+```
+
+## Claim Request
+
+```http
+POST /v1/entitlements/claims
+Authorization: Bearer <session-token>
+Content-Type: application/json
+Idempotency-Key: <uuid>
+```
+
+Request body:
+
+```json
+{
+  "audience": "com.jungyeons.iosapphackinglab",
+  "deviceClass": "ios-simulator",
+  "clientVersion": "1.0.0"
+}
+```
+
+The authenticated session identifies the account. The request body does not need to send a raw email address for the entitlement decision.
+
+## Claim Response
+
+```json
+{
+  "claim": {
+    "iss": "https://api.example.test",
+    "aud": "com.jungyeons.iosapphackinglab",
+    "sub": "acct_hash_2f7a3e4a",
+    "plan": "premium",
+    "premium": true,
+    "scope": ["lab.read", "premium.demo"],
+    "iat": "2026-04-27T12:00:00Z",
+    "exp": "2026-04-28T12:00:00Z",
+    "jti": "claim_01JZLABDEMO0001"
+  },
+  "signature": {
+    "alg": "ES256",
+    "kid": "entitlement-p256-2026-04",
+    "value": "<base64url-es256-signature>"
+  }
+}
+```
+
+The server signs a canonical UTF-8 payload containing the `claim` object. A real implementation should standardize canonicalization, key rotation, and replay protection before release.
+
+## Client Verification Rules
+
+The app should reject the claim unless all checks pass:
+
+- `signature.kid` maps to a trusted public key.
+- `signature.alg` is the expected algorithm.
+- The signature verifies over the canonical claim payload.
+- `claim.iss` matches the trusted issuer.
+- `claim.aud` matches the app bundle identifier.
+- `claim.exp` is in the future and `claim.iat` is not suspiciously far ahead of device time.
+- `claim.jti` has not been revoked when the app can reach the server.
+- The app treats the local cache as a hint only; sensitive server actions still require server-side authorization.
+
+## Status Codes
+
+| Status | Meaning | Client behavior |
+| --- | --- | --- |
+| `200` | Signed claim returned | Verify, then cache the verified result |
+| `401` | Missing or invalid session | Sign in again |
+| `403` | Account is not entitled | Cache a signed non-premium claim if provided |
+| `409` | Idempotency conflict | Retry with a new idempotency key |
+| `429` | Rate limited | Back off and keep the last verified cache for display only |
+| `500` | Server error | Do not grant new access from an unsigned or stale response |
+
+## Mapping To This Lab
+
+`SimulatedEntitlementAuthority` uses a deterministic in-app P-256 key so the lab can run fully offline. That is intentionally not production-safe. The learning target is the verification boundary:
+
+- `lab.premium.enabled` is mutable local UI state.
+- `lab.premium.serverClaim` is accepted only after signature, issuer, key ID, and expiration checks.
+- A tampered cached claim returns `trusted=false` and does not grant premium access.

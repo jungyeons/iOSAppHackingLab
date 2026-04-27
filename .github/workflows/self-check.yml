@@ -19,3 +19,18 @@ jobs:
 
       - name: Run self-check
         run: swift run iOSAppHackingLab --self-check
+
+      - name: Upload public demo media
+        uses: actions/upload-artifact@v7
+        with:
+          name: iosapphackinglab-demo-media
+          path: |
+            artifacts/*.png
+            artifacts/*.gif
+            docs/CI_ARTIFACTS.md
+            docs/SIGNED_ENTITLEMENT_API.md
+            docs/SAMPLE_STUDY_REPORT.md
+            docs/REPORT_EXPORT_FLOW.md
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0

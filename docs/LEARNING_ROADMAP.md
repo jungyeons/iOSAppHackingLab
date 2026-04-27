@@ -42,3 +42,6 @@ This roadmap keeps the project useful as a portfolio artifact while staying insi
 - [x] Keep generated study reports in a private notes folder or a sanitized sample.
 - [x] Add in-app sanitized report export flow.
 - [x] Add GitHub topics such as `swift`, `swiftui`, `ios-security`, and `security-lab`.
+- [x] Capture actual sanitized report storage-location selection flow.
+- [x] Document a production-style signed entitlement API contract.
+- [x] Upload demo screenshots and GIFs as GitHub Actions artifacts.

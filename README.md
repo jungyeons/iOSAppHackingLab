@@ -35,6 +35,8 @@ The same SwiftUI lab runs as a Swift Package app on macOS and as a native Xcode 
 
 ![Sanitized report export demo](artifacts/ios-simulator-report-export-demo.gif)
 
+![Sanitized report export location flow](artifacts/ios-simulator-report-export-location-flow.gif)
+
 | Runtime run | LLDB guide | Frida observer |
 | --- | --- | --- |
 | ![Runtime run](artifacts/ios-simulator-runtime-run.png) | ![LLDB guide](artifacts/ios-simulator-runtime-lldb.png) | ![Frida observer](artifacts/ios-simulator-runtime-frida.png) |
@@ -42,6 +44,10 @@ The same SwiftUI lab runs as a Swift Package app on macOS and as a native Xcode 
 | Local override denied | Server-authorized premium |
 | --- | --- |
 | ![Local override denied](artifacts/ios-simulator-entitlement-override.png) | ![Server-authorized premium](artifacts/ios-simulator-entitlement-paid.png) |
+
+| Export ready | Storage picker | Export saved |
+| --- | --- | --- |
+| ![Export ready](artifacts/ios-simulator-report-export-location-ready.png) | ![Storage picker](artifacts/ios-simulator-report-export-location-picker.png) | ![Export saved](artifacts/ios-simulator-report-export-saved-location.png) |
 
 ## 현재 기능
 
@@ -119,6 +125,10 @@ swift tools/make-demo-gif.swift artifacts/ios-simulator-runtime-demo.gif \
 swift tools/make-demo-gif.swift artifacts/ios-simulator-report-export-demo.gif \
   artifacts/ios-simulator-report-export-ready.png \
   artifacts/ios-simulator-report-exported.png
+swift tools/make-demo-gif.swift artifacts/ios-simulator-report-export-location-flow.gif \
+  artifacts/ios-simulator-report-export-location-ready.png \
+  artifacts/ios-simulator-report-export-location-picker.png \
+  artifacts/ios-simulator-report-export-saved-location.png
 ```
 
 ## 안전 범위
@@ -129,10 +139,13 @@ swift tools/make-demo-gif.swift artifacts/ios-simulator-report-export-demo.gif \
 
 - [Simulator storage inspection](docs/SIMULATOR_STORAGE.md)
 - [Runtime instrumentation lab](docs/INSTRUMENTATION.md)
+- [Sanitized report export flow](docs/REPORT_EXPORT_FLOW.md)
+- [Signed entitlement API contract](docs/SIGNED_ENTITLEMENT_API.md)
+- [GitHub Actions demo artifacts](docs/CI_ARTIFACTS.md)
 - [Sanitized sample study report](docs/SAMPLE_STUDY_REPORT.md)
 
 ## 다음 단계
 
-- Sanitized report export 화면에서 실제 저장 위치 선택 흐름 캡처
-- Signed claim 검증을 실제 서버 API 계약 예시 문서로 확장
-- 스크린샷/GIF를 GitHub Actions artifact로 보관하는 흐름 추가
+- 실제 서버 API 예시를 Swift async client stub으로 확장
+- Actions artifact에 자동 screenshot dimension 검증 추가
+- File export 결과를 Files 앱에서 다시 여는 캡처 추가

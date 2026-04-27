@@ -10,6 +10,7 @@ iOSAppHackingLab shares one SwiftUI codebase between a Swift Package macOS app a
 - `SelfCheck`: command-line validation for core redaction and report-generation behavior.
 - `Views`: SwiftUI navigation, lab detail pages, reusable sections, and lab action panels.
 - `iOSAppHackingLab.xcodeproj`: native iOS app target and shared scheme for Simulator builds.
+- `.github/workflows/self-check.yml`: CI validation and public-safe demo media artifact upload.
 
 ## Data Flow
 
@@ -20,6 +21,7 @@ iOSAppHackingLab shares one SwiftUI codebase between a Swift Package macOS app a
 5. `ChallengeDetail` exposes a sanitized report export flow using SwiftUI `fileExporter` and a Markdown `FileDocument`.
 6. `swift run iOSAppHackingLab --self-check` runs isolated checks without launching the app window.
 7. `xcodebuild` builds the same Swift sources into `iOSAppHackingLab.app` for iOS Simulator.
+8. GitHub Actions uploads sanitized screenshots, GIFs, and selected docs as `iosapphackinglab-demo-media`.
 
 ## Persistence
 
@@ -37,7 +39,11 @@ The intentionally weak path stores premium access in `lab.premium.enabled`. The 
 
 The cached claim includes a hashed account, plan, premium decision, issuer key ID, expiration, and signature. `verifyServerEntitlementCache()` grants access only when the signature validates, the issuer key matches, and the claim is not expired.
 
-This is a local teaching model, not a real backend. In a production app, the authoritative decision should come from a trusted service, App Store receipt validation, or a cryptographically verifiable claim whose private signing material is kept server-side, not embedded in the app.
+This is a local teaching model, not a real backend. In a production app, the authoritative decision should come from a trusted service, App Store receipt validation, or a cryptographically verifiable claim whose private signing material is kept server-side, not embedded in the app. The example production contract is documented in `docs/SIGNED_ENTITLEMENT_API.md`.
+
+## Report Export Evidence
+
+`docs/REPORT_EXPORT_FLOW.md` captures the actual iOS `fileExporter` path: prepare sanitized report, tap `Export .md`, choose the storage location, and save. These images are public-safe because the generated report redacts common token, password, account, and local path patterns before export.
 
 ## Current Platform Shape
 

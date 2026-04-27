@@ -60,6 +60,16 @@ tmp/
 
 This project currently focuses on `Library/Preferences`. If future labs write files, screenshots, or cached API responses, document the exact path and the reason the data is safe or unsafe to store there.
 
+## Sanitized Report Export Location
+
+The report export flow uses SwiftUI `fileExporter`, so the user chooses the destination through the iOS document picker rather than the app writing directly into its sandbox. The captured simulator run saves to `나의 iPhone` (`On My iPhone`).
+
+Portfolio evidence:
+
+- `artifacts/ios-simulator-report-export-location-picker.png` shows the storage location selection UI.
+- `artifacts/ios-simulator-report-export-saved-location.png` shows the app's successful export status.
+- `docs/REPORT_EXPORT_FLOW.md` records the full capture sequence.
+
 ## Keychain Note
 
 The Keychain comparison does not write the secret into the app container plist. In the simulator, Keychain storage belongs to the simulator device environment rather than the app's `Library/Preferences` file. For this portfolio lab, capture the app's Keychain success output and the absence of the Keychain password in `com.jungyeons.iosapphackinglab.plist` instead of publishing raw secrets.
