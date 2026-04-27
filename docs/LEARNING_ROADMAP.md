@@ -35,6 +35,8 @@ This roadmap keeps the project useful as a portfolio artifact while staying insi
 - [x] Add GitHub Actions self-check CI.
 - [x] Add an initial screenshot.
 - [x] Add lab-state screenshots.
+- [x] Add server-authoritative entitlement example screenshots.
 - [x] Add a short demo GIF.
 - [x] Keep generated study reports in a private notes folder or a sanitized sample.
+- [x] Add in-app sanitized report export flow.
 - [ ] Add GitHub topics such as `swift`, `swiftui`, `ios-security`, and `security-lab`.

@@ -37,12 +37,17 @@ The same SwiftUI lab runs as a Swift Package app on macOS and as a native Xcode 
 | --- | --- | --- |
 | ![Runtime run](artifacts/ios-simulator-runtime-run.png) | ![LLDB guide](artifacts/ios-simulator-runtime-lldb.png) | ![Frida observer](artifacts/ios-simulator-runtime-frida.png) |
 
+| Local override denied | Server-authorized premium |
+| --- | --- |
+| ![Local override denied](artifacts/ios-simulator-entitlement-override.png) | ![Server-authorized premium](artifacts/ios-simulator-entitlement-paid.png) |
+
 ## 현재 기능
 
 - 랩별 진행률 체크
 - 랩별 학습 노트 저장
 - 취약 패턴과 안전한 구현 패턴 비교
 - Markdown 학습 리포트 생성
+- Sanitized Markdown 리포트 export
 - UserDefaults와 Keychain 저장 방식 비교
 - 민감 로그와 redacted event log 비교
 - 로컬 entitlement와 server-authoritative 모델 비교
@@ -91,6 +96,7 @@ tools/
 3. 저장 위치, 로그, 하드코딩된 값을 직접 확인합니다.
 4. 왜 취약한지 적고 더 안전한 설계를 생각합니다.
 5. 앱에서 Markdown 리포트를 생성해 학습 기록으로 남깁니다.
+6. 공개 포트폴리오에 올릴 때는 Sanitized report export를 사용합니다.
 
 ## 유용한 명령
 
@@ -101,6 +107,8 @@ rg "lab.premium.serverClaim|SimulatedEntitlementAuthority" .
 swift run
 swift run iOSAppHackingLab --self-check
 xcrun simctl list devices available
+xcrun simctl launch --terminate-running-process booted com.jungyeons.iosapphackinglab --lab tamperable-state --demo entitlement-override
+xcrun simctl launch --terminate-running-process booted com.jungyeons.iosapphackinglab --lab tamperable-state --demo entitlement-paid
 swift tools/make-demo-gif.swift artifacts/ios-simulator-runtime-demo.gif \
   artifacts/ios-simulator-runtime-run.png \
   artifacts/ios-simulator-runtime-lldb.png \
@@ -120,5 +128,5 @@ swift tools/make-demo-gif.swift artifacts/ios-simulator-runtime-demo.gif \
 ## 다음 단계
 
 - GitHub topics 추가
-- Server-authoritative entitlement 예시 스크린샷 보강
-- Sanitized report를 앱에서 export하는 흐름 추가
+- Sanitized report export 데모 GIF 추가
+- Simulated entitlement claim을 서명된 claim 예시로 확장

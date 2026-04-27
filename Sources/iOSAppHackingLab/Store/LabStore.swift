@@ -13,6 +13,8 @@ final class LabStore: ObservableObject {
     @Published var completedChallengeIDs: Set<String> = []
     @Published var notes: [String: String] = [:]
     @Published var report = ""
+    @Published var sanitizedReport = ""
+    @Published var reportExportStatus = ""
 
     private let defaults: UserDefaults
     private let weakKey: UInt8 = 0x42
@@ -119,6 +121,68 @@ final class LabStore: ObservableObject {
 
         \(labSections)
         """
+    }
+
+    func generateSanitizedReport(challenges: [LabChallenge]) {
+        let completed = completedCount(in: challenges)
+        let generatedAt = ISO8601DateFormatter().string(from: Date())
+        let labSections = challenges.map { challenge in
+            let mark = isCompleted(challenge) ? "x" : " "
+            let note = sanitizedFreeformText(note(for: challenge.id).trimmingCharacters(in: .whitespacesAndNewlines))
+            let noteBlock = note.isEmpty ? "No sanitized notes yet." : note
+            let evidence = challenge.evidencePrompts
+                .map { "- [ ] \(sanitizedFreeformText($0))" }
+                .joined(separator: "\n")
+
+            return """
+            ## \(challenge.title)
+
+            - Status: [\(mark)] Complete
+            - Category: \(challenge.category)
+            - Attack surface: \(challenge.attackSurface)
+            - Sanitized objective: \(sanitizedFreeformText(challenge.objective))
+            - Public takeaway: \(sanitizedFreeformText(challenge.portfolioTakeaway))
+
+            Sanitized evidence checklist:
+            \(evidence)
+
+            Sanitized notes:
+            \(noteBlock)
+            """
+        }
+        .joined(separator: "\n\n")
+
+        sanitizedReport = """
+        # iOSAppHackingLab Sanitized Study Report
+
+        Generated: \(generatedAt)
+
+        ## Public Sharing Guardrails
+
+        This export is intended for a public portfolio. It removes common token, password, account, and local filesystem patterns from freeform notes before writing the Markdown file.
+
+        Progress: \(completed)/\(challenges.count) labs complete
+
+        ## Scope
+
+        - Target: `com.jungyeons.iosapphackinglab`
+        - Environment: local SwiftUI app and iOS Simulator builds
+        - Allowed activity: inspect this intentionally vulnerable lab app and document defensive findings
+        - Out of scope: third-party apps, production services, real accounts, real user data, and unauthorized bypass work
+
+        \(labSections)
+        """
+
+        reportExportStatus = "Sanitized report ready for Markdown export."
+    }
+
+    func handleSanitizedReportExport(_ result: Result<URL, Error>) {
+        switch result {
+        case .success(let url):
+            reportExportStatus = "Exported sanitized Markdown report: \(url.lastPathComponent)"
+        case .failure(let error):
+            reportExportStatus = "Sanitized report export failed: \(error.localizedDescription)"
+        }
     }
 
     func copyReportToClipboard() {
@@ -293,6 +357,7 @@ final class LabStore: ObservableObject {
     }
 
     func attemptLocalEntitlementOverride() {
+        isPremiumEnabled = true
         defaults.set(true, forKey: "lab.premium.enabled")
         let cached = defaults.string(forKey: serverClaimKey) ?? "<missing>"
         let cachedPremium = entitlementAuthority.cachedPremium(from: cached)
@@ -381,6 +446,46 @@ final class LabStore: ObservableObject {
         defaults.set(notes, forKey: notesKey)
     }
 
+    private func sanitizedFreeformText(_ value: String) -> String {
+        var sanitized = value
+        let replacements: [(pattern: String, template: String, options: NSRegularExpression.Options)] = [
+            (#"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b"#, "<redacted:email>", [.caseInsensitive]),
+            (#"\blab-token-[A-Za-z0-9-]+\b"#, "<redacted:token>", []),
+            (#"\blab-observe-[A-Za-z0-9-]+\b"#, "<redacted:runtime-token>", []),
+            (#"(?i)\b(password|passwd|pwd)\s*[:=]\s*[^,\s;]+"#, "$1=<redacted:password>", []),
+            (#"/Users/[^\s`]+"#, "/Users/<redacted:path>", [])
+        ]
+
+        for replacement in replacements {
+            sanitized = replacingMatches(
+                in: sanitized,
+                pattern: replacement.pattern,
+                template: replacement.template,
+                options: replacement.options
+            )
+        }
+        return sanitized
+    }
+
+    private func replacingMatches(
+        in value: String,
+        pattern: String,
+        template: String,
+        options: NSRegularExpression.Options
+    ) -> String {
+        guard let expression = try? NSRegularExpression(pattern: pattern, options: options) else {
+            return value
+        }
+
+        let range = NSRange(value.startIndex..<value.endIndex, in: value)
+        return expression.stringByReplacingMatches(
+            in: value,
+            options: [],
+            range: range,
+            withTemplate: template
+        )
+    }
+
     private func applyLaunchDemoIfNeeded() {
         guard let mode = AppLaunchOptions.demoMode else {
             return
@@ -393,6 +498,15 @@ final class LabStore: ObservableObject {
             showLLDBObservationGuide()
         case "runtime-frida":
             showFridaObservationGuide()
+        case "entitlement-free":
+            requestServerEntitlement(account: "student@example.com")
+        case "entitlement-paid":
+            requestServerEntitlement(account: "paid@example.com")
+        case "entitlement-override":
+            requestServerEntitlement(account: "student@example.com")
+            attemptLocalEntitlementOverride()
+        case "sanitized-report":
+            generateSanitizedReport(challenges: LabChallenge.seed)
         default:
             break
         }

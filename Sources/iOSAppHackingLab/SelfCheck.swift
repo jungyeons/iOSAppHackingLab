@@ -13,11 +13,12 @@ enum SelfCheck {
         checkObservationProbe(failures: &failures)
         checkServerEntitlement(failures: &failures)
         checkReportGeneration(failures: &failures)
+        checkSanitizedReportExport(failures: &failures)
 
         if failures.isEmpty {
             return SelfCheckResult(
                 didPass: true,
-                output: "Self-check passed: redaction, entitlement authority, observation probe, and report generation are working."
+                output: "Self-check passed: redaction, entitlement authority, observation probe, report generation, and sanitized export are working."
             )
         }
 
@@ -86,6 +87,31 @@ enum SelfCheck {
         expect(checkpointEvent.contains("label=self-check"), "Probe checkpoint event is missing its label.", failures: &failures)
         expect(!checkpointEvent.contains(token), "Probe checkpoint event contains the raw token.", failures: &failures)
         expect(finishEvent.contains("result=ok"), "Probe finish event is missing its result.", failures: &failures)
+    }
+
+    private static func checkSanitizedReportExport(failures: inout [String]) {
+        let suiteName = "iOSAppHackingLab.sanitized-report.self-check.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            failures.append("Could not create isolated defaults suite for sanitized report.")
+            return
+        }
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        let store = LabStore(defaults: defaults)
+        let note = "account=student@example.com password=passw0rd token=lab-token-super-secret path=/Users/jungyeons/private.txt"
+        store.updateNote(note, for: LabChallenge.seed[0].id)
+        store.generateSanitizedReport(challenges: [LabChallenge.seed[0]])
+
+        expect(store.sanitizedReport.contains("# iOSAppHackingLab Sanitized Study Report"), "Sanitized report is missing its title.", failures: &failures)
+        expect(store.sanitizedReport.contains("<redacted:email>"), "Sanitized report did not redact email-like text.", failures: &failures)
+        expect(store.sanitizedReport.contains("<redacted:password>"), "Sanitized report did not redact password-like text.", failures: &failures)
+        expect(store.sanitizedReport.contains("<redacted:token>"), "Sanitized report did not redact lab token text.", failures: &failures)
+        expect(store.sanitizedReport.contains("/Users/<redacted:path>"), "Sanitized report did not redact local user path.", failures: &failures)
+        expect(!store.sanitizedReport.contains("student@example.com"), "Sanitized report contains a raw email.", failures: &failures)
+        expect(!store.sanitizedReport.contains("passw0rd"), "Sanitized report contains a raw password sample.", failures: &failures)
+        expect(!store.sanitizedReport.contains("lab-token-super-secret"), "Sanitized report contains a raw token.", failures: &failures)
     }
 
     private static func checkServerEntitlement(failures: inout [String]) {

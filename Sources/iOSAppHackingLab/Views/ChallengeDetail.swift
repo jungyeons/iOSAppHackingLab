@@ -1,7 +1,10 @@
+import Foundation
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct ChallengeDetail: View {
     @EnvironmentObject private var labStore: LabStore
+    @State private var isExportingSanitizedReport = false
     let challenge: LabChallenge
 
     private var noteBinding: Binding<String> {
@@ -97,23 +100,51 @@ struct ChallengeDetail: View {
                 }
 
                 LabSection(title: "Report", systemImage: "doc.text") {
-                    HStack {
-                        Button {
-                            labStore.generateReport(challenges: LabChallenge.seed)
-                        } label: {
-                            Label("Generate Markdown Report", systemImage: "doc.badge.gearshape")
+                    VStack(alignment: .leading, spacing: 10) {
+                        HStack {
+                            Button {
+                                labStore.generateReport(challenges: LabChallenge.seed)
+                            } label: {
+                                Label("Generate Markdown", systemImage: "doc.badge.gearshape")
+                            }
+
+                            Button {
+                                labStore.copyReportToClipboard()
+                            } label: {
+                                Label("Copy", systemImage: "doc.on.doc")
+                            }
+                            .disabled(labStore.report.isEmpty)
                         }
 
-                        Button {
-                            labStore.copyReportToClipboard()
-                        } label: {
-                            Label("Copy", systemImage: "doc.on.doc")
+                        HStack {
+                            Button {
+                                labStore.generateSanitizedReport(challenges: LabChallenge.seed)
+                            } label: {
+                                Label("Prepare Sanitized", systemImage: "wand.and.stars")
+                            }
+
+                            Button {
+                                isExportingSanitizedReport = true
+                            } label: {
+                                Label("Export .md", systemImage: "square.and.arrow.up")
+                            }
+                            .disabled(labStore.sanitizedReport.isEmpty)
                         }
-                        .disabled(labStore.report.isEmpty)
+                    }
+                    .buttonStyle(.bordered)
+
+                    if !labStore.reportExportStatus.isEmpty {
+                        Label(labStore.reportExportStatus, systemImage: "checkmark.shield")
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
                     }
 
                     if !labStore.report.isEmpty {
                         ConsoleOutput(text: labStore.report, minHeight: 180)
+                    }
+
+                    if !labStore.sanitizedReport.isEmpty {
+                        ConsoleOutput(text: labStore.sanitizedReport, minHeight: 180)
                     }
                 }
             }
@@ -132,6 +163,40 @@ struct ChallengeDetail: View {
                 }
             }
         }
+        .fileExporter(
+            isPresented: $isExportingSanitizedReport,
+            document: MarkdownReportDocument(text: labStore.sanitizedReport),
+            contentType: .markdownReport,
+            defaultFilename: "iOSAppHackingLab-Sanitized-Study-Report.md",
+            onCompletion: labStore.handleSanitizedReportExport
+        )
         .background(Color.labWindowBackground)
+    }
+}
+
+struct MarkdownReportDocument: FileDocument {
+    static var readableContentTypes: [UTType] {
+        [.markdownReport]
+    }
+
+    var text: String
+
+    init(text: String = "") {
+        self.text = text
+    }
+
+    init(configuration: ReadConfiguration) throws {
+        let data = configuration.file.regularFileContents ?? Data()
+        text = String(decoding: data, as: UTF8.self)
+    }
+
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        FileWrapper(regularFileWithContents: Data(text.utf8))
+    }
+}
+
+extension UTType {
+    static var markdownReport: UTType {
+        UTType(filenameExtension: "md") ?? .plainText
     }
 }

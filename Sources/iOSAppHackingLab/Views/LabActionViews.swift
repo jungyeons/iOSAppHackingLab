@@ -115,7 +115,14 @@ struct VerboseLoggingLab: View {
 
 struct TamperableStateLab: View {
     @EnvironmentObject private var labStore: LabStore
-    @State private var account = "student@example.com"
+    @State private var account: String
+
+    init() {
+        let demoAccount = AppLaunchOptions.demoMode == "entitlement-paid"
+            ? "paid@example.com"
+            : "student@example.com"
+        _account = State(initialValue: demoAccount)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {

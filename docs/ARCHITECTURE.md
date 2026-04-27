@@ -5,7 +5,7 @@ iOSAppHackingLab shares one SwiftUI codebase between a Swift Package macOS app a
 ## Layers
 
 - `Models`: data-driven lab definitions, including risk text, inspection hints, evidence prompts, and completion criteria.
-- `Store`: observable app state for progress, notes, lab actions, and Markdown report generation.
+- `Store`: observable app state for progress, notes, lab actions, Markdown report generation, and sanitized report export.
 - `Security`: platform API wrappers and helpers used for safer comparisons, such as Keychain storage and redacted logging.
 - `SelfCheck`: command-line validation for core redaction and report-generation behavior.
 - `Views`: SwiftUI navigation, lab detail pages, reusable sections, and lab action panels.
@@ -16,9 +16,10 @@ iOSAppHackingLab shares one SwiftUI codebase between a Swift Package macOS app a
 1. `ContentView` lists the lab definitions from `LabChallenge.seed`.
 2. `ChallengeDetail` renders the selected lab's risk model, practice steps, evidence prompts, notes, and report controls.
 3. Lab action views call methods on `LabStore`.
-4. `LabStore` performs intentionally weak local behavior, records console-style output, persists notes/progress in `UserDefaults`, and generates a Markdown study report.
-5. `swift run iOSAppHackingLab --self-check` runs isolated checks without launching the app window.
-6. `xcodebuild` builds the same Swift sources into `iOSAppHackingLab.app` for iOS Simulator.
+4. `LabStore` performs intentionally weak local behavior, records console-style output, persists notes/progress in `UserDefaults`, and generates Markdown study reports.
+5. `ChallengeDetail` exposes a sanitized report export flow using SwiftUI `fileExporter` and a Markdown `FileDocument`.
+6. `swift run iOSAppHackingLab --self-check` runs isolated checks without launching the app window.
+7. `xcodebuild` builds the same Swift sources into `iOSAppHackingLab.app` for iOS Simulator.
 
 ## Persistence
 
