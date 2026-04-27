@@ -34,11 +34,16 @@ struct ChallengeDetail: View {
                     Text(challenge.summary)
                         .font(.title3)
                         .foregroundStyle(.secondary)
+
+                    Text(challenge.objective)
+                        .foregroundStyle(.secondary)
+                        .lineSpacing(4)
                 }
 
                 HStack(spacing: 10) {
                     StatusPill(text: challenge.category, systemImage: "square.grid.2x2")
                     StatusPill(text: challenge.difficulty, systemImage: "gauge.with.dots.needle.33percent")
+                    StatusPill(text: challenge.attackSurface, systemImage: "scope")
                 }
 
                 LabSection(title: "Risk Model", systemImage: "exclamationmark.triangle") {
@@ -59,12 +64,22 @@ struct ChallengeDetail: View {
                     BulletList(items: challenge.inspectHints, systemImage: "magnifyingglass")
                 }
 
+                LabSection(title: "Evidence To Capture", systemImage: "doc.text.magnifyingglass") {
+                    BulletList(items: challenge.evidencePrompts, systemImage: "camera.viewfinder")
+                }
+
                 LabSection(title: "Completion Checklist", systemImage: "checklist") {
                     BulletList(items: challenge.completionCriteria, systemImage: "checkmark.circle")
                 }
 
                 LabSection(title: "Safer Pattern", systemImage: "lock.shield") {
                     Text(challenge.saferPattern)
+                        .foregroundStyle(.secondary)
+                        .lineSpacing(4)
+                }
+
+                LabSection(title: "Portfolio Takeaway", systemImage: "star.leadinghalf.filled") {
+                    Text(challenge.portfolioTakeaway)
                         .foregroundStyle(.secondary)
                         .lineSpacing(4)
                 }

@@ -56,10 +56,18 @@ final class LabStore: ObservableObject {
     func generateReport(challenges: [LabChallenge]) {
         let completed = completedCount(in: challenges)
         let generatedAt = ISO8601DateFormatter().string(from: Date())
+        let completedTitles = challenges
+            .filter { isCompleted($0) }
+            .map(\.title)
+            .joined(separator: ", ")
+        let completedSummary = completedTitles.isEmpty ? "No labs completed yet." : completedTitles
         let labSections = challenges.map { challenge in
             let mark = isCompleted(challenge) ? "x" : " "
             let note = note(for: challenge.id).trimmingCharacters(in: .whitespacesAndNewlines)
             let noteBlock = note.isEmpty ? "No notes yet." : note
+            let evidence = challenge.evidencePrompts
+                .map { "- [ ] \($0)" }
+                .joined(separator: "\n")
 
             return """
             ## \(challenge.title)
@@ -67,8 +75,14 @@ final class LabStore: ObservableObject {
             - Status: [\(mark)] Complete
             - Category: \(challenge.category)
             - Difficulty: \(challenge.difficulty)
+            - Attack surface: \(challenge.attackSurface)
+            - Objective: \(challenge.objective)
             - Risk: \(challenge.risk)
             - Safer pattern: \(challenge.saferPattern)
+            - Portfolio takeaway: \(challenge.portfolioTakeaway)
+
+            Evidence to capture:
+            \(evidence)
 
             Notes:
             \(noteBlock)
@@ -81,7 +95,19 @@ final class LabStore: ObservableObject {
 
         Generated: \(generatedAt)
 
+        ## Executive Summary
+
+        This report documents defensive security practice against the intentionally vulnerable local app in this repository. It does not authorize testing against third-party apps, production services, or devices without explicit permission.
+
         Progress: \(completed)/\(challenges.count) labs complete
+
+        Completed labs: \(completedSummary)
+
+        ## Scope
+
+        - Target: iOSAppHackingLab local SwiftUI lab app
+        - Allowed activity: inspect, run, modify, and document this intentionally vulnerable codebase
+        - Out of scope: real user data, third-party apps, production services, and bypassing access controls on systems you do not own
 
         \(labSections)
         """
