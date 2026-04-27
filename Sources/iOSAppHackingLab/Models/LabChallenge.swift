@@ -95,12 +95,14 @@ struct LabChallenge: Identifiable, Hashable {
             practice: "Trigger the login and inspect the app output. The goal is to recognize sensitive data exposure through logs during development and testing.",
             inspectHints: [
                 "Search for NSLog in the source.",
+                "Search for RedactingLogger in the source.",
                 "Run the app from Terminal to see stdout and stderr behavior.",
                 "Think about production log redaction rules."
             ],
             evidencePrompts: [
                 "Capture the generated token appearing in app output.",
                 "Record the exact log statement that caused the exposure.",
+                "Capture the redacted event log and confirm the raw token is absent.",
                 "Draft a safer event-style log message with no raw secret."
             ],
             saferPattern: "Log events, states, and opaque correlation IDs instead of raw secrets. Centralize logging helpers so sensitive fields are redacted by default.",

@@ -4,17 +4,17 @@ This roadmap keeps the project useful as a portfolio artifact while staying insi
 
 ## Milestone 1: Local Weaknesses
 
-- Plaintext preference storage.
-- Hardcoded static secret.
-- Sensitive debug logging.
-- Mutable local entitlement state.
+- [x] Plaintext preference storage.
+- [x] Hardcoded static secret.
+- [x] Sensitive debug logging.
+- [x] Mutable local entitlement state.
 
 ## Milestone 2: Safer Comparisons
 
-- Keychain-backed credential storage.
-- Redacted logging helper.
-- Server-authoritative entitlement model.
-- Clear separation between local cache and authorization.
+- [x] Keychain-backed credential storage.
+- [x] Redacted logging helper.
+- [ ] Server-authoritative entitlement model.
+- [ ] Clear separation between local cache and authorization.
 
 ## Milestone 3: iOS Simulator Target
 

@@ -217,6 +217,18 @@ final class LabStore: ObservableObject {
         """
     }
 
+    func performRedactedDebugLogin(account: String) {
+        let token = "lab-token-\(UUID().uuidString)"
+        let event = RedactingLogger.loginSucceeded(account: account, token: token)
+        console = """
+        Login succeeded with redacted logging.
+        The token was generated but not written to the log.
+
+        Safe log event:
+        \(event)
+        """
+    }
+
     func saveLocalEntitlement() {
         defaults.set(isPremiumEnabled, forKey: "lab.premium.enabled")
         console = """

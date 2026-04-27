@@ -6,7 +6,7 @@ iOSAppHackingLab is a Swift Package that builds a SwiftUI app without requiring 
 
 - `Models`: data-driven lab definitions, including risk text, inspection hints, evidence prompts, and completion criteria.
 - `Store`: observable app state for progress, notes, lab actions, and Markdown report generation.
-- `Security`: platform API wrappers used for safer comparisons, such as Keychain storage.
+- `Security`: platform API wrappers and helpers used for safer comparisons, such as Keychain storage and redacted logging.
 - `Views`: SwiftUI navigation, lab detail pages, reusable sections, and lab action panels.
 
 ## Data Flow
@@ -22,6 +22,7 @@ iOSAppHackingLab is a Swift Package that builds a SwiftUI app without requiring 
 - Notes: `UserDefaults` key `lab.progress.notes`.
 - Vulnerable storage lab: `UserDefaults` keys `lab.username` and `lab.password`.
 - Safer storage comparison: Keychain generic password item under service `iOSAppHackingLab.local-lab`.
+- Safer logging comparison: `RedactingLogger` emits event-style logs without raw account or token values.
 
 ## Current Platform Shape
 

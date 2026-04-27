@@ -84,6 +84,7 @@ struct WeakSecretLab: View {
 
 struct VerboseLoggingLab: View {
     @EnvironmentObject private var labStore: LabStore
+    @State private var account = "student@example.com"
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -92,6 +93,19 @@ struct VerboseLoggingLab: View {
             Button("Perform Debug Login") {
                 labStore.performDebugLogin()
             }
+
+            Divider()
+
+            Text("Safer comparison")
+                .font(.headline)
+
+            TextField("Account", text: $account)
+                .textFieldStyle(.roundedBorder)
+
+            Button("Perform Redacted Login Log") {
+                labStore.performRedactedDebugLogin(account: account)
+            }
+
             ConsoleOutput(text: labStore.console)
         }
     }

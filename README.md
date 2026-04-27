@@ -20,13 +20,14 @@ swift run
 - 취약 패턴과 안전한 구현 패턴 비교
 - Markdown 학습 리포트 생성
 - UserDefaults와 Keychain 저장 방식 비교
+- 민감 로그와 redacted event log 비교
 - 증거 캡처 체크리스트와 포트폴리오용 takeaway 정리
 
 ## 포함된 랩
 
 - Insecure Local Storage: `UserDefaults` 평문 저장과 Keychain 저장 비교
 - Weak Static Secret: 하드코딩된 XOR 키로 payload 인코딩
-- Sensitive Debug Logging: 민감한 토큰을 `NSLog`로 출력
+- Sensitive Debug Logging: 민감한 토큰 로그와 redacted 로그 비교
 - Tamperable Entitlement: 로컬 boolean 값을 권한처럼 신뢰
 
 ## 프로젝트 구조
