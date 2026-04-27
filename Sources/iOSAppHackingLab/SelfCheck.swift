@@ -18,7 +18,7 @@ enum SelfCheck {
         if failures.isEmpty {
             return SelfCheckResult(
                 didPass: true,
-                output: "Self-check passed: redaction, entitlement authority, observation probe, report generation, and sanitized export are working."
+                output: "Self-check passed: redaction, signed entitlement authority, observation probe, report generation, and sanitized export are working."
             )
         }
 
@@ -118,13 +118,26 @@ enum SelfCheck {
         let authority = SimulatedEntitlementAuthority()
         let freeClaim = authority.fetchEntitlement(account: "student@example.com")
         let paidClaim = authority.fetchEntitlement(account: "paid@example.com")
+        let freeVerification = authority.verifyCachedClaim(freeClaim.cacheValue)
+        let paidVerification = authority.verifyCachedClaim(paidClaim.cacheValue)
+        let tamperedPaidClaim = paidClaim.cacheValue.replacingOccurrences(of: "premium=true", with: "premium=false")
+        let tamperedVerification = authority.verifyCachedClaim(tamperedPaidClaim)
 
         expect(!freeClaim.isPremium, "Student account should not be premium in the simulated authority.", failures: &failures)
         expect(paidClaim.isPremium, "Paid account should be premium in the simulated authority.", failures: &failures)
         expect(freeClaim.cacheValue.contains("simulated-server-authority"), "Entitlement cache is missing its decision source.", failures: &failures)
+        expect(freeClaim.cacheValue.contains("signature="), "Entitlement cache is missing its signature.", failures: &failures)
+        expect(freeClaim.cacheValue.contains("keyID=lab-simulated-issuer-1"), "Entitlement cache is missing its issuer key ID.", failures: &failures)
         expect(!paidClaim.cacheValue.contains("paid@example.com"), "Entitlement cache contains the raw account.", failures: &failures)
+        expect(freeVerification.isTrusted, "Free signed entitlement should be trusted.", failures: &failures)
+        expect(paidVerification.isTrusted, "Paid signed entitlement should be trusted.", failures: &failures)
+        expect(freeVerification.isSignatureValid, "Free signed entitlement signature should be valid.", failures: &failures)
+        expect(paidVerification.isSignatureValid, "Paid signed entitlement signature should be valid.", failures: &failures)
         expect(authority.cachedPremium(from: freeClaim.cacheValue) == false, "Free cached entitlement parsed incorrectly.", failures: &failures)
         expect(authority.cachedPremium(from: paidClaim.cacheValue) == true, "Paid cached entitlement parsed incorrectly.", failures: &failures)
+        expect(!tamperedVerification.isTrusted, "Tampered signed entitlement should not be trusted.", failures: &failures)
+        expect(!tamperedVerification.isSignatureValid, "Tampered signed entitlement signature should be invalid.", failures: &failures)
+        expect(authority.cachedPremium(from: tamperedPaidClaim) == nil, "Tampered cached entitlement should not return a premium decision.", failures: &failures)
     }
 
     private static func expect(_ condition: Bool, _ message: String, failures: inout [String]) {

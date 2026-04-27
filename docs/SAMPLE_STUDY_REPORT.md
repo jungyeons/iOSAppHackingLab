@@ -22,7 +22,7 @@ Progress: 5/5 labs complete
 | Insecure Local Storage | `lab.username` and `lab.password` appeared in the app defaults plist | Password value replaced with `<redacted>` |
 | Weak Static Secret | Static `weakKey` source reference and reversible payload round trip | Payload replaced with a sample lab string |
 | Sensitive Debug Logging | `NSLog` token flow and redacted event logger comparison | Raw token replaced with `<redacted:token>` |
-| Tamperable Entitlement | `lab.premium.enabled` changed locally while server claim stayed authoritative | Account represented by hash only |
+| Tamperable Entitlement | `lab.premium.enabled` changed locally while signed server claim stayed authoritative | Account represented by hash only |
 | Runtime Observation Drill | `LabObservationProbe` selector events observed in app output | Token and account values redacted |
 
 ## Insecure Local Storage
@@ -80,7 +80,9 @@ Sanitized evidence:
 
 ```text
 lab.premium.enabled=true
-lab.premium.serverClaim=source=simulated-server-authority;accountHash=<hash>;plan=free;premium=false;claimID=<claim-id>
+lab.premium.serverClaim=source=simulated-server-authority;accountHash=<hash>;plan=free;premium=false;claimID=<claim-id>;issuedAt=<iso8601>;expiresAt=<iso8601>;keyID=lab-simulated-issuer-1;signature=<redacted:signature>
+signatureValid=true
+trusted=true
 ```
 
 Observed result: changing the local boolean did not change the safer model's `serverAuthorizedPremium` decision.

@@ -124,17 +124,18 @@ struct LabChallenge: Identifiable, Hashable {
             objective: "Show why authorization cannot rely on mutable local UI state or unsigned cached preferences.",
             attackSurface: "Local state tampering",
             risk: "Local-only entitlement state can be changed by the user. When the app trusts it directly, business logic can be bypassed without attacking a server.",
-            practice: "Toggle premium, save it, reload it, then compare that with the simulated server-authoritative entitlement response. The goal is to understand why authorization decisions need server-side validation or signed local state.",
+            practice: "Toggle premium, save it, reload it, then compare that with the simulated server-authoritative signed entitlement response. The goal is to understand why authorization decisions need server-side validation or signed local state.",
             inspectHints: [
                 "Search for lab.premium.enabled in the source.",
                 "Search for lab.premium.serverClaim in the source.",
                 "Inspect and modify the saved defaults value.",
-                "Compare local UI state with SimulatedEntitlementAuthority."
+                "Compare local UI state with SimulatedEntitlementAuthority and signed claim verification."
             ],
             evidencePrompts: [
                 "Capture both false and true entitlement values.",
                 "Record where the entitlement state is persisted.",
-                "Capture the simulated server claim for student@example.com and paid@example.com.",
+                "Capture the simulated signed server claim for student@example.com and paid@example.com.",
+                "Capture a signature verification result for the cached claim.",
                 "Describe which component should make the authorization decision."
             ],
             saferPattern: "Validate entitlements with a trusted service, signed receipt, or cryptographically verifiable local claim. Treat local UI state as a cache, not authority.",
@@ -142,7 +143,7 @@ struct LabChallenge: Identifiable, Hashable {
             completionCriteria: [
                 "Saved both false and true entitlement states.",
                 "Identified the local key that controls the feature.",
-                "Showed that a local override does not change the server-authoritative decision.",
+                "Showed that a local override does not change the verified signed claim decision.",
                 "Explained what component should be authoritative for premium access."
             ],
             kind: .tamperableState

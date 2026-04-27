@@ -147,18 +147,19 @@ struct ChallengeDetail: View {
                         ConsoleOutput(text: labStore.sanitizedReport, minHeight: 180)
                     }
                 }
+                .id("report")
             }
             .padding(28)
             .frame(maxWidth: 900, alignment: .leading)
             }
             .onAppear {
-                guard AppLaunchOptions.shouldFocusDemoOutput else {
+                guard let focusAnchorID = AppLaunchOptions.demoFocusAnchorID else {
                     return
                 }
 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     withAnimation(.easeInOut(duration: 0.2)) {
-                        proxy.scrollTo("lab-actions", anchor: .top)
+                        proxy.scrollTo(focusAnchorID, anchor: .top)
                     }
                 }
             }

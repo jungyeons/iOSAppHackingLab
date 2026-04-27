@@ -14,6 +14,7 @@ This roadmap keeps the project useful as a portfolio artifact while staying insi
 - [x] Keychain-backed credential storage.
 - [x] Redacted logging helper.
 - [x] Server-authoritative entitlement model.
+- [x] Signed entitlement claim verification example.
 - [x] Clear separation between local cache and authorization.
 
 ## Milestone 3: iOS Simulator Target
@@ -37,6 +38,7 @@ This roadmap keeps the project useful as a portfolio artifact while staying insi
 - [x] Add lab-state screenshots.
 - [x] Add server-authoritative entitlement example screenshots.
 - [x] Add a short demo GIF.
+- [x] Add sanitized report export demo GIF.
 - [x] Keep generated study reports in a private notes folder or a sanitized sample.
 - [x] Add in-app sanitized report export flow.
-- [ ] Add GitHub topics such as `swift`, `swiftui`, `ios-security`, and `security-lab`.
+- [x] Add GitHub topics such as `swift`, `swiftui`, `ios-security`, and `security-lab`.

@@ -173,6 +173,12 @@ struct TamperableStateLab: View {
                 }
 
                 Button {
+                    labStore.verifyServerEntitlementCache()
+                } label: {
+                    Label("Verify Signed Claim", systemImage: "signature")
+                }
+
+                Button {
                     labStore.attemptLocalEntitlementOverride()
                 } label: {
                     Label("Try Local Override", systemImage: "exclamationmark.arrow.triangle.2.circlepath")

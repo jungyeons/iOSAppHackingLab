@@ -14,6 +14,17 @@ enum AppLaunchOptions {
         demoMode != nil
     }
 
+    static var demoFocusAnchorID: String? {
+        switch demoMode {
+        case "sanitized-report", "sanitized-report-exported":
+            return "report"
+        case .some:
+            return "lab-actions"
+        case .none:
+            return nil
+        }
+    }
+
     private static func value(after flag: String) -> String? {
         let arguments = CommandLine.arguments
         guard let index = arguments.firstIndex(of: flag) else {

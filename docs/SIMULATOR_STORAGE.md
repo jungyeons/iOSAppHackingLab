@@ -43,7 +43,7 @@ What to capture:
 
 - `lab.username` and `lab.password` demonstrate plaintext preference storage.
 - `lab.premium.enabled` demonstrates mutable local entitlement state.
-- `lab.premium.serverClaim` demonstrates a safer cache shape where the account is hashed and the decision source is explicit.
+- `lab.premium.serverClaim` demonstrates a safer cache shape where the account is hashed, the decision source is explicit, and the claim is signed.
 - `lab.progress.*` demonstrates normal non-sensitive app state.
 
 ## App Sandbox Folders
@@ -63,6 +63,18 @@ This project currently focuses on `Library/Preferences`. If future labs write fi
 ## Keychain Note
 
 The Keychain comparison does not write the secret into the app container plist. In the simulator, Keychain storage belongs to the simulator device environment rather than the app's `Library/Preferences` file. For this portfolio lab, capture the app's Keychain success output and the absence of the Keychain password in `com.jungyeons.iosapphackinglab.plist` instead of publishing raw secrets.
+
+## Signed Entitlement Claim
+
+The signed entitlement comparison still stores a cache in the simulator defaults plist, but the app treats it as untrusted until verification succeeds.
+
+Expected shape:
+
+```text
+lab.premium.serverClaim=source=simulated-server-authority;accountHash=<hash>;plan=<free|premium>;premium=<true|false>;claimID=<claim-id>;issuedAt=<iso8601>;expiresAt=<iso8601>;keyID=lab-simulated-issuer-1;signature=<base64-der-signature>
+```
+
+Portfolio evidence should show `signatureValid=true` and `trusted=true` for a normal claim, then explain that changing `lab.premium.enabled` does not change the signed claim decision.
 
 ## Resetting Local Lab State
 

@@ -33,6 +33,8 @@ The same SwiftUI lab runs as a Swift Package app on macOS and as a native Xcode 
 
 ![Runtime observation demo](artifacts/ios-simulator-runtime-demo.gif)
 
+![Sanitized report export demo](artifacts/ios-simulator-report-export-demo.gif)
+
 | Runtime run | LLDB guide | Frida observer |
 | --- | --- | --- |
 | ![Runtime run](artifacts/ios-simulator-runtime-run.png) | ![LLDB guide](artifacts/ios-simulator-runtime-lldb.png) | ![Frida observer](artifacts/ios-simulator-runtime-frida.png) |
@@ -50,7 +52,7 @@ The same SwiftUI lab runs as a Swift Package app on macOS and as a native Xcode 
 - Sanitized Markdown 리포트 export
 - UserDefaults와 Keychain 저장 방식 비교
 - 민감 로그와 redacted event log 비교
-- 로컬 entitlement와 server-authoritative 모델 비교
+- 로컬 entitlement와 서명 검증 기반 server-authoritative 모델 비교
 - 증거 캡처 체크리스트와 포트폴리오용 takeaway 정리
 - `--self-check` 내장 검증 모드
 - GitHub Actions 기반 self-check CI
@@ -63,7 +65,7 @@ The same SwiftUI lab runs as a Swift Package app on macOS and as a native Xcode 
 - Insecure Local Storage: `UserDefaults` 평문 저장과 Keychain 저장 비교
 - Weak Static Secret: 하드코딩된 XOR 키로 payload 인코딩
 - Sensitive Debug Logging: 민감한 토큰 로그와 redacted 로그 비교
-- Tamperable Entitlement: 로컬 boolean 권한과 server-authoritative claim 비교
+- Tamperable Entitlement: 로컬 boolean 권한과 P256-SHA256 signed claim 비교
 - Runtime Observation Drill: LLDB/Frida로 이 앱의 lab-only probe 관찰
 
 ## 프로젝트 구조
@@ -103,16 +105,20 @@ tools/
 ```bash
 rg "lab\\.|weakKey|NSLog" .
 rg "LabObservationProbe|runRuntimeObservation" .
-rg "lab.premium.serverClaim|SimulatedEntitlementAuthority" .
+rg "lab.premium.serverClaim|SimulatedEntitlementAuthority|Verify Signed Claim" .
 swift run
 swift run iOSAppHackingLab --self-check
 xcrun simctl list devices available
 xcrun simctl launch --terminate-running-process booted com.jungyeons.iosapphackinglab --lab tamperable-state --demo entitlement-override
 xcrun simctl launch --terminate-running-process booted com.jungyeons.iosapphackinglab --lab tamperable-state --demo entitlement-paid
+xcrun simctl launch --terminate-running-process booted com.jungyeons.iosapphackinglab --demo sanitized-report-exported
 swift tools/make-demo-gif.swift artifacts/ios-simulator-runtime-demo.gif \
   artifacts/ios-simulator-runtime-run.png \
   artifacts/ios-simulator-runtime-lldb.png \
   artifacts/ios-simulator-runtime-frida.png
+swift tools/make-demo-gif.swift artifacts/ios-simulator-report-export-demo.gif \
+  artifacts/ios-simulator-report-export-ready.png \
+  artifacts/ios-simulator-report-exported.png
 ```
 
 ## 안전 범위
@@ -127,6 +133,6 @@ swift tools/make-demo-gif.swift artifacts/ios-simulator-runtime-demo.gif \
 
 ## 다음 단계
 
-- GitHub topics 추가
-- Sanitized report export 데모 GIF 추가
-- Simulated entitlement claim을 서명된 claim 예시로 확장
+- Sanitized report export 화면에서 실제 저장 위치 선택 흐름 캡처
+- Signed claim 검증을 실제 서버 API 계약 예시 문서로 확장
+- 스크린샷/GIF를 GitHub Actions artifact로 보관하는 흐름 추가

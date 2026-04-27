@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 
 #if os(macOS)
 import AppKit
@@ -323,36 +324,62 @@ final class LabStore: ObservableObject {
 
     func requestServerEntitlement(account: String) {
         let claim = entitlementAuthority.fetchEntitlement(account: account)
-        serverAuthorizedPremium = claim.isPremium
+        let verification = entitlementAuthority.verifyCachedClaim(claim.cacheValue)
+        serverAuthorizedPremium = verification.isTrusted && claim.isPremium
         defaults.set(claim.cacheValue, forKey: serverClaimKey)
         console = """
-        Server-authoritative entitlement response:
+        Signed server-authoritative entitlement response:
         decisionSource=\(claim.decisionSource)
         accountHash=\(claim.accountHash)
         plan=\(claim.plan)
         premium=\(claim.isPremium)
         claimID=\(claim.claimID)
+        keyID=\(claim.keyID)
+        alg=\(claim.algorithm)
+        expiresAt=\(claim.expiresAt)
+        signature=\(claim.signatureFingerprint)
+        signatureValid=\(verification.isSignatureValid)
 
         Cached display claim:
-        \(serverClaimKey)=\(claim.cacheValue)
+        \(serverClaimKey)=\(displaySignedClaim(claim.cacheValue))
 
-        Safer pattern: local UI state can cache the result, but the authoritative decision comes from the trusted service, not from lab.premium.enabled.
+        Safer pattern: local UI state can cache the result, but the authoritative decision comes from a trusted issuer and a verifiable signed claim, not from lab.premium.enabled.
         """
     }
 
     func reloadServerEntitlementCache() {
         let cached = defaults.string(forKey: serverClaimKey) ?? "<missing>"
-        let cachedPremium = entitlementAuthority.cachedPremium(from: cached)
-        if let cachedPremium {
-            serverAuthorizedPremium = cachedPremium
-        }
+        let verification = entitlementAuthority.verifyCachedClaim(cached)
+        serverAuthorizedPremium = verification.isTrusted && (verification.isPremium ?? false)
 
         console = """
-        Reloaded cached server entitlement:
-        \(serverClaimKey)=\(cached)
-        cachedPremium=\(cachedPremium.map(String.init) ?? "<missing>")
+        Reloaded signed server entitlement:
+        signatureValid=\(verification.isSignatureValid)
+        expired=\(verification.isExpired)
+        trusted=\(verification.isTrusted)
+        cachedPremium=\(verification.isPremium.map(String.init) ?? "<missing>")
+        reason=\(verification.reason)
+
+        \(serverClaimKey)=\(displaySignedClaim(cached))
 
         Lab note: this cache is for display and offline UX. A real app should revalidate with a trusted service or verify a signed platform receipt before granting access.
+        """
+    }
+
+    func verifyServerEntitlementCache() {
+        let cached = defaults.string(forKey: serverClaimKey) ?? "<missing>"
+        let verification = entitlementAuthority.verifyCachedClaim(cached)
+        serverAuthorizedPremium = verification.isTrusted && (verification.isPremium ?? false)
+
+        console = """
+        Signed claim verification:
+        signatureValid=\(verification.isSignatureValid)
+        expired=\(verification.isExpired)
+        trusted=\(verification.isTrusted)
+        premium=\(verification.isPremium.map(String.init) ?? "<missing>")
+        reason=\(verification.reason)
+
+        Verification boundary: the app can read the cached claim, but access is granted only when the signature is valid and the claim is still inside its validity window.
         """
     }
 
@@ -360,20 +387,21 @@ final class LabStore: ObservableObject {
         isPremiumEnabled = true
         defaults.set(true, forKey: "lab.premium.enabled")
         let cached = defaults.string(forKey: serverClaimKey) ?? "<missing>"
-        let cachedPremium = entitlementAuthority.cachedPremium(from: cached)
-        if let cachedPremium {
-            serverAuthorizedPremium = cachedPremium
-        }
+        let verification = entitlementAuthority.verifyCachedClaim(cached)
+        serverAuthorizedPremium = verification.isTrusted && (verification.isPremium ?? false)
 
         console = """
         Local override attempt:
         lab.premium.enabled=true
 
-        Server-authoritative decision:
-        \(serverClaimKey)=\(cached)
+        Signed server-authoritative decision:
+        signatureValid=\(verification.isSignatureValid)
+        trusted=\(verification.isTrusted)
         premium=\(serverAuthorizedPremium)
 
-        Result: changing the local boolean does not grant premium in the safer model. The feature decision follows the server claim instead.
+        \(serverClaimKey)=\(displaySignedClaim(cached))
+
+        Result: changing the local boolean does not grant premium in the safer model. The feature decision follows the verified signed claim instead.
         """
     }
 
@@ -446,6 +474,15 @@ final class LabStore: ObservableObject {
         defaults.set(notes, forKey: notesKey)
     }
 
+    private func displaySignedClaim(_ value: String) -> String {
+        replacingMatches(
+            in: value,
+            pattern: #"signature=[^;\s]+"#,
+            template: "signature=<redacted:signature>",
+            options: []
+        )
+    }
+
     private func sanitizedFreeformText(_ value: String) -> String {
         var sanitized = value
         let replacements: [(pattern: String, template: String, options: NSRegularExpression.Options)] = [
@@ -505,10 +542,27 @@ final class LabStore: ObservableObject {
         case "entitlement-override":
             requestServerEntitlement(account: "student@example.com")
             attemptLocalEntitlementOverride()
+        case "entitlement-verify":
+            requestServerEntitlement(account: "paid@example.com")
+            verifyServerEntitlementCache()
         case "sanitized-report":
-            generateSanitizedReport(challenges: LabChallenge.seed)
+            prepareSanitizedReportDemo(exported: false)
+        case "sanitized-report-exported":
+            prepareSanitizedReportDemo(exported: true)
         default:
             break
+        }
+    }
+
+    private func prepareSanitizedReportDemo(exported: Bool) {
+        completedChallengeIDs = Set(LabChallenge.seed.map(\.id))
+        notes[LabChallenge.seed[0].id] = "Demo note: account=student@example.com password=passw0rd token=lab-token-super-secret path=/Users/jungyeons/private.txt"
+        persistProgress()
+        persistNotes()
+        generateSanitizedReport(challenges: LabChallenge.seed)
+
+        if exported {
+            reportExportStatus = "Exported sanitized Markdown report: iOSAppHackingLab-Sanitized-Study-Report.md"
         }
     }
 }
@@ -555,19 +609,75 @@ struct ServerEntitlementClaim: Equatable {
     let isPremium: Bool
     let claimID: String
     let decisionSource: String
+    let issuedAt: String
+    let expiresAt: String
+    let keyID: String
+    let signature: String
+
+    var algorithm: String {
+        "P256-SHA256"
+    }
+
+    var signedPayload: String {
+        Self.canonicalPayload(
+            decisionSource: decisionSource,
+            accountHash: accountHash,
+            plan: plan,
+            isPremium: isPremium,
+            claimID: claimID,
+            issuedAt: issuedAt,
+            expiresAt: expiresAt,
+            keyID: keyID
+        )
+    }
+
+    var signatureFingerprint: String {
+        "\(String(signature.prefix(18)))..."
+    }
 
     var cacheValue: String {
+        "\(signedPayload);signature=\(signature)"
+    }
+
+    static func canonicalPayload(
+        decisionSource: String,
+        accountHash: String,
+        plan: String,
+        isPremium: Bool,
+        claimID: String,
+        issuedAt: String,
+        expiresAt: String,
+        keyID: String
+    ) -> String {
         [
             "source=\(decisionSource)",
             "accountHash=\(accountHash)",
             "plan=\(plan)",
             "premium=\(isPremium)",
-            "claimID=\(claimID)"
+            "claimID=\(claimID)",
+            "issuedAt=\(issuedAt)",
+            "expiresAt=\(expiresAt)",
+            "keyID=\(keyID)"
         ].joined(separator: ";")
     }
 }
 
+struct SignedEntitlementVerification: Equatable {
+    let isSignatureValid: Bool
+    let isExpired: Bool
+    let isTrusted: Bool
+    let isPremium: Bool?
+    let reason: String
+}
+
 struct SimulatedEntitlementAuthority {
+    private static let signingKey: P256.Signing.PrivateKey = {
+        let rawKey = Data(repeating: 0x01, count: 32)
+        return try! P256.Signing.PrivateKey(rawRepresentation: rawKey)
+    }()
+
+    private let keyID = "lab-simulated-issuer-1"
+    private let decisionSource = "simulated-server-authority"
     private let paidAccounts: Set<String> = [
         "paid@example.com",
         "portfolio-reviewer@example.com"
@@ -577,20 +687,98 @@ struct SimulatedEntitlementAuthority {
         let normalized = normalize(account)
         let isPremium = paidAccounts.contains(normalized)
         let plan = isPremium ? "premium" : "free"
-        return ServerEntitlementClaim(
-            accountHash: fingerprint(normalized),
+        let issuedAt = timestamp()
+        let expiresAt = timestamp(adding: 60 * 60 * 24 * 30)
+        let accountHash = fingerprint(normalized)
+        let claimID = "claim-\(fingerprint("\(normalized)|\(plan)"))"
+        let signedPayload = ServerEntitlementClaim.canonicalPayload(
+            decisionSource: decisionSource,
+            accountHash: accountHash,
             plan: plan,
             isPremium: isPremium,
-            claimID: "claim-\(fingerprint("\(normalized)|\(plan)"))",
-            decisionSource: "simulated-server-authority"
+            claimID: claimID,
+            issuedAt: issuedAt,
+            expiresAt: expiresAt,
+            keyID: keyID
+        )
+
+        return ServerEntitlementClaim(
+            accountHash: accountHash,
+            plan: plan,
+            isPremium: isPremium,
+            claimID: claimID,
+            decisionSource: decisionSource,
+            issuedAt: issuedAt,
+            expiresAt: expiresAt,
+            keyID: keyID,
+            signature: signature(for: signedPayload)
         )
     }
 
     func cachedPremium(from cacheValue: String) -> Bool? {
-        cacheValue
-            .split(separator: ";")
-            .first { $0.hasPrefix("premium=") }
-            .flatMap { Bool(String($0.dropFirst("premium=".count))) }
+        let verification = verifyCachedClaim(cacheValue)
+        return verification.isTrusted ? verification.isPremium : nil
+    }
+
+    func verifyCachedClaim(_ cacheValue: String) -> SignedEntitlementVerification {
+        let fields = parseFields(cacheValue)
+        guard
+            let source = fields["source"],
+            let accountHash = fields["accountHash"],
+            let plan = fields["plan"],
+            let premiumValue = fields["premium"],
+            let isPremium = Bool(premiumValue),
+            let claimID = fields["claimID"],
+            let issuedAt = fields["issuedAt"],
+            let expiresAt = fields["expiresAt"],
+            let claimKeyID = fields["keyID"],
+            let signature = fields["signature"]
+        else {
+            return SignedEntitlementVerification(
+                isSignatureValid: false,
+                isExpired: false,
+                isTrusted: false,
+                isPremium: nil,
+                reason: "missing required signed claim fields"
+            )
+        }
+
+        let payload = ServerEntitlementClaim.canonicalPayload(
+            decisionSource: source,
+            accountHash: accountHash,
+            plan: plan,
+            isPremium: isPremium,
+            claimID: claimID,
+            issuedAt: issuedAt,
+            expiresAt: expiresAt,
+            keyID: claimKeyID
+        )
+        let signatureValid = isSignatureValid(signature, for: payload)
+        let expired = isExpired(expiresAt)
+        let trusted = source == decisionSource
+            && claimKeyID == keyID
+            && signatureValid
+            && !expired
+        let reason: String
+        if trusted {
+            reason = "signed claim accepted"
+        } else if source != decisionSource {
+            reason = "unexpected decision source"
+        } else if claimKeyID != keyID {
+            reason = "unexpected issuer key"
+        } else if !signatureValid {
+            reason = "signature verification failed"
+        } else {
+            reason = "claim expired"
+        }
+
+        return SignedEntitlementVerification(
+            isSignatureValid: signatureValid,
+            isExpired: expired,
+            isTrusted: trusted,
+            isPremium: isPremium,
+            reason: reason
+        )
     }
 
     private func normalize(_ account: String) -> String {
@@ -607,5 +795,45 @@ struct SimulatedEntitlementAuthority {
             hash = hash &* 1_099_511_628_211
         }
         return String(format: "%016llx", hash)
+    }
+
+    private func timestamp(adding seconds: TimeInterval = 0) -> String {
+        ISO8601DateFormatter().string(from: Date().addingTimeInterval(seconds))
+    }
+
+    private func signature(for payload: String) -> String {
+        let data = Data(payload.utf8)
+        let signature = try! Self.signingKey.signature(for: data)
+        return signature.derRepresentation.base64EncodedString()
+    }
+
+    private func isSignatureValid(_ signature: String, for payload: String) -> Bool {
+        guard
+            let signatureData = Data(base64Encoded: signature),
+            let signature = try? P256.Signing.ECDSASignature(derRepresentation: signatureData)
+        else {
+            return false
+        }
+
+        return Self.signingKey.publicKey.isValidSignature(signature, for: Data(payload.utf8))
+    }
+
+    private func isExpired(_ expiresAt: String) -> Bool {
+        guard let expiration = ISO8601DateFormatter().date(from: expiresAt) else {
+            return true
+        }
+        return expiration <= Date()
+    }
+
+    private func parseFields(_ cacheValue: String) -> [String: String] {
+        cacheValue
+            .split(separator: ";")
+            .reduce(into: [String: String]()) { fields, entry in
+                let parts = entry.split(separator: "=", maxSplits: 1, omittingEmptySubsequences: false)
+                guard parts.count == 2 else {
+                    return
+                }
+                fields[String(parts[0])] = String(parts[1])
+            }
     }
 }
