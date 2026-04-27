@@ -11,13 +11,14 @@ final class LabStore: ObservableObject {
     @Published var notes: [String: String] = [:]
     @Published var report = ""
 
-    private let defaults = UserDefaults.standard
+    private let defaults: UserDefaults
     private let weakKey: UInt8 = 0x42
     private let progressKey = "lab.progress.completedChallengeIDs"
     private let notesKey = "lab.progress.notes"
     private var lastPayload = ""
 
-    init() {
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
         completedChallengeIDs = Set(defaults.stringArray(forKey: progressKey) ?? [])
         notes = defaults.dictionary(forKey: notesKey) as? [String: String] ?? [:]
     }

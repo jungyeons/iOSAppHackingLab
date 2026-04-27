@@ -7,6 +7,7 @@ iOSAppHackingLab is a Swift Package that builds a SwiftUI app without requiring 
 - `Models`: data-driven lab definitions, including risk text, inspection hints, evidence prompts, and completion criteria.
 - `Store`: observable app state for progress, notes, lab actions, and Markdown report generation.
 - `Security`: platform API wrappers and helpers used for safer comparisons, such as Keychain storage and redacted logging.
+- `SelfCheck`: command-line validation for core redaction and report-generation behavior.
 - `Views`: SwiftUI navigation, lab detail pages, reusable sections, and lab action panels.
 
 ## Data Flow
@@ -15,6 +16,7 @@ iOSAppHackingLab is a Swift Package that builds a SwiftUI app without requiring 
 2. `ChallengeDetail` renders the selected lab's risk model, practice steps, evidence prompts, notes, and report controls.
 3. Lab action views call methods on `LabStore`.
 4. `LabStore` performs intentionally weak local behavior, records console-style output, persists notes/progress in `UserDefaults`, and generates a Markdown study report.
+5. `swift run iOSAppHackingLab --self-check` runs isolated checks without launching the app window.
 
 ## Persistence
 

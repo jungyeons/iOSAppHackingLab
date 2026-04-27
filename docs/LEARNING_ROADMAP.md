@@ -31,6 +31,7 @@ This roadmap keeps the project useful as a portfolio artifact while staying insi
 
 ## Milestone 5: Portfolio Polish
 
-- Add screenshots and a short demo GIF.
-- Keep generated study reports in a private notes folder or a sanitized sample.
-- Add GitHub topics such as `swift`, `swiftui`, `ios-security`, and `security-lab`.
+- [x] Add a local validation command.
+- [ ] Add screenshots and a short demo GIF.
+- [ ] Keep generated study reports in a private notes folder or a sanitized sample.
+- [ ] Add GitHub topics such as `swift`, `swiftui`, `ios-security`, and `security-lab`.

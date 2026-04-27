@@ -22,6 +22,7 @@ swift run
 - UserDefaults와 Keychain 저장 방식 비교
 - 민감 로그와 redacted event log 비교
 - 증거 캡처 체크리스트와 포트폴리오용 takeaway 정리
+- `--self-check` 내장 검증 모드
 
 ## 포함된 랩
 
@@ -57,6 +58,7 @@ docs/
 ```bash
 rg "lab\\.|weakKey|NSLog" .
 swift run
+swift run iOSAppHackingLab --self-check
 ```
 
 ## 안전 범위
