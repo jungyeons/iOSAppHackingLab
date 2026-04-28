@@ -16,6 +16,7 @@ Included files:
 - `docs/SAMPLE_STUDY_REPORT.md`
 - `docs/REPORT_EXPORT_FLOW.md`
 - `docs/RELEASE_NOTES_TEMPLATE.md`
+- `docs/RELEASE_DRAFT.md`
 
 The artifact intentionally excludes simulator containers, generated private notes, raw logs, and local exported Markdown files.
 
@@ -42,6 +43,14 @@ The manifest records every public demo media file with path, type, pixel dimensi
 The README links to the checked-in manifest with the `Demo Media Manifest` badge so the same media inventory is visible from the repository front page and from the Actions artifact.
 
 The release notes template summarizes the same manifest in reviewer-friendly form: media count, PNG/GIF split, total bytes, validation commands, and the artifact name.
+
+The workflow also runs:
+
+```bash
+swift tools/generate-release-draft.swift --version workflow-draft --date "$(date -u +%Y-%m-%d)"
+```
+
+That generated draft is uploaded with the artifact as `docs/RELEASE_DRAFT.md`.
 
 ## Why Upload These
 

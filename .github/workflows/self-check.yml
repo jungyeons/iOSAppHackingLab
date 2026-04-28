@@ -26,6 +26,9 @@ jobs:
       - name: Generate media manifest
         run: swift tools/generate-media-manifest.swift
 
+      - name: Generate release draft
+        run: swift tools/generate-release-draft.swift --version workflow-draft --date "$(date -u +%Y-%m-%d)"
+
       - name: Upload public demo media
         uses: actions/upload-artifact@v7
         with:
@@ -39,6 +42,7 @@ jobs:
             docs/SAMPLE_STUDY_REPORT.md
             docs/REPORT_EXPORT_FLOW.md
             docs/RELEASE_NOTES_TEMPLATE.md
+            docs/RELEASE_DRAFT.md
           if-no-files-found: error
           retention-days: 30
           compression-level: 0

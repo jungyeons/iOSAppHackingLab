@@ -57,3 +57,6 @@ This roadmap keeps the project useful as a portfolio artifact while staying insi
 - [x] Add a short API client mock flow GIF.
 - [x] Summarize the media manifest in a release notes template.
 - [x] Add an in-app sanitized report export history panel.
+- [x] Add a captioned API client mock GIF variant.
+- [x] Generate a GitHub release draft from the media manifest.
+- [x] Add an artifact link field to the export history panel.

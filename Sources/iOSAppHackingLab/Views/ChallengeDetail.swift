@@ -211,6 +211,14 @@ struct ReportExportHistoryPanel: View {
                                 Text(item.createdAt, format: .dateTime.month().day().hour().minute())
                                     .font(.caption2)
                                     .foregroundStyle(.tertiary)
+
+                                if let artifactLink = item.artifactLink,
+                                   let artifactURL = URL(string: artifactLink) {
+                                    Link(destination: artifactURL) {
+                                        Label("Artifact: iosapphackinglab-demo-media", systemImage: "shippingbox")
+                                            .font(.caption2.weight(.semibold))
+                                    }
+                                }
                             }
                         }
                     }

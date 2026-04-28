@@ -125,6 +125,8 @@ The Tamperable Entitlement lab connects the client stub to a live SwiftUI action
 
 ![Signed entitlement API client mock flow](../artifacts/ios-simulator-entitlement-api-client-mock.gif)
 
+![Captioned signed entitlement API client mock flow](../artifacts/ios-simulator-entitlement-api-client-mock-captioned.gif)
+
 ![Signed entitlement API client mock](../artifacts/ios-simulator-entitlement-api-client-mock.png)
 
 That button uses `MockSignedEntitlementAPISession` as a local stand-in for the server. It performs the same async client flow as a real integration:
@@ -147,6 +149,9 @@ xcrun simctl io booted screenshot artifacts/ios-simulator-entitlement-api-client
 swift tools/make-demo-gif.swift artifacts/ios-simulator-entitlement-api-client-mock.gif \
   artifacts/ios-simulator-entitlement-api-client-ready.png \
   artifacts/ios-simulator-entitlement-api-client-mock.png
+swift tools/make-captioned-demo-gif.swift --mobile-crop artifacts/ios-simulator-entitlement-api-client-mock-captioned.gif \
+  'artifacts/ios-simulator-entitlement-api-client-ready.png::1. A trusted signed server claim is visible before the live API client mock.' \
+  'artifacts/ios-simulator-entitlement-api-client-mock.png::2. The async client calls key discovery and claim endpoints, then redacts the mock session token.'
 ```
 
 ## Status Codes

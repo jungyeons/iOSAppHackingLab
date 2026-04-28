@@ -39,6 +39,7 @@ This flow captures the in-app path for exporting a public-safe study report from
 - The Files app screenshots show the exported Markdown as a recent file and then reopened in the system preview.
 - The narrated GIF uses a shorter mobile crop so the reopen proof stays readable in the README and Actions artifact preview.
 - The in-app history panel records sanitized report preparation, export success, and export failure events with redacted details.
+- Each history row includes an artifact link field that points reviewers to the `iosapphackinglab-demo-media` Actions artifact entry point.
 
 ## Reproduce
 

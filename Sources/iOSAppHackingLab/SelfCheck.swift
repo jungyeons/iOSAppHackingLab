@@ -115,6 +115,11 @@ enum SelfCheck {
         expect(!store.sanitizedReport.contains("lab-token-super-secret"), "Sanitized report contains a raw token.", failures: &failures)
         expect(store.sanitizedReportExportHistory.count == 1, "Sanitized report preparation was not added to export history.", failures: &failures)
         expect(store.sanitizedReportExportHistory.first?.status == .prepared, "Sanitized report history did not record the prepared state.", failures: &failures)
+        expect(
+            store.sanitizedReportExportHistory.first?.artifactLink?.contains("actions/workflows/self-check.yml") == true,
+            "Sanitized report history is missing its artifact link.",
+            failures: &failures
+        )
 
         store.handleSanitizedReportExport(
             .success(URL(fileURLWithPath: "/tmp/student@example.com-report.md"))
@@ -132,6 +137,11 @@ enum SelfCheck {
         expect(
             reloadedStore.sanitizedReportExportHistory.first?.status == .exported,
             "Sanitized report export history was not persisted.",
+            failures: &failures
+        )
+        expect(
+            reloadedStore.sanitizedReportExportHistory.first?.artifactLink?.contains("actions/workflows/self-check.yml") == true,
+            "Sanitized report export artifact link was not persisted.",
             failures: &failures
         )
     }

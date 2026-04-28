@@ -19,6 +19,7 @@ struct ReportExportHistoryItem: Identifiable, Codable, Equatable {
     let status: Status
     let title: String
     let detail: String
+    let artifactLink: String?
 }
 
 final class LabStore: ObservableObject {
@@ -38,6 +39,7 @@ final class LabStore: ObservableObject {
     private let notesKey = "lab.progress.notes"
     private let serverClaimKey = "lab.premium.serverClaim"
     private let reportExportHistoryKey = "lab.report.sanitizedExportHistory"
+    private let demoMediaArtifactLink = "https://github.com/jungyeons/iOSAppHackingLab/actions/workflows/self-check.yml"
     private let observationProbe = LabObservationProbe.shared
     private let entitlementAuthority = SimulatedEntitlementAuthority()
     private var lastPayload = ""
@@ -602,7 +604,8 @@ final class LabStore: ObservableObject {
             createdAt: Date(),
             status: status,
             title: title,
-            detail: sanitizedFreeformText(detail)
+            detail: sanitizedFreeformText(detail),
+            artifactLink: demoMediaArtifactLink
         )
 
         sanitizedReportExportHistory.insert(item, at: 0)

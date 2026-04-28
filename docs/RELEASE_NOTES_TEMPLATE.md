@@ -2,6 +2,13 @@
 
 Use this template when drafting a GitHub release for the public portfolio repository.
 
+Generate a ready-to-use GitHub release draft from the current media manifest:
+
+```bash
+swift tools/generate-media-manifest.swift
+swift tools/generate-release-draft.swift --version v0.1.0 --date 2026-04-28
+```
+
 ## <version> - <date>
 
 ### Highlights
@@ -14,18 +21,20 @@ Use this template when drafting a GitHub release for the public portfolio reposi
 
 - Manifest: [`artifacts/media-manifest.json`](../artifacts/media-manifest.json)
 - GitHub Actions artifact: `iosapphackinglab-demo-media`
-- Checked-in public media: 22 files
+- Checked-in public media: 23 files
 - PNG screenshots: 16
-- GIF demos: 6
-- Total public media bytes: 15,058,831
+- GIF demos: 7
+- Total public media bytes: 15,494,605
 - Validation command: `swift tools/verify-demo-media.swift`
 - Manifest command: `swift tools/generate-media-manifest.swift`
+- Release draft command: `swift tools/generate-release-draft.swift --version v0.1.0 --date 2026-04-28`
 
 Update the counts above after regenerating `artifacts/media-manifest.json`.
 
 ### New Or Updated Evidence
 
 - API client mock flow GIF: `artifacts/ios-simulator-entitlement-api-client-mock.gif`
+- Captioned API client mock flow GIF: `artifacts/ios-simulator-entitlement-api-client-mock-captioned.gif`
 - API client mock result screenshot: `artifacts/ios-simulator-entitlement-api-client-mock.png`
 - Sanitized report export history screenshot: `artifacts/ios-simulator-report-export-history.png`
 - Files app narrated reopen GIF: `artifacts/ios-simulator-report-export-files-reopen-narrated.gif`
