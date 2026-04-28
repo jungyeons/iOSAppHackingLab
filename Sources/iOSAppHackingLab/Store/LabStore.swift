@@ -615,6 +615,10 @@ final class LabStore: ObservableObject {
         case "entitlement-verify":
             requestServerEntitlement(account: "paid@example.com")
             verifyServerEntitlementCache()
+        case "entitlement-api-mock":
+            Task { @MainActor in
+                await requestSignedEntitlementAPIMock(account: "paid@example.com")
+            }
         case "sanitized-report":
             prepareSanitizedReportDemo(exported: false)
         case "sanitized-report-exported":

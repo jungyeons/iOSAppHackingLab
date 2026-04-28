@@ -1,6 +1,14 @@
 {
-  "generatedAt" : "2026-04-28T05:40:22Z",
+  "generatedAt" : "2026-04-28T07:01:36Z",
   "media" : [
+    {
+      "bytes" : 1174882,
+      "height" : 2622,
+      "path" : "artifacts/ios-simulator-entitlement-api-client-mock.png",
+      "sha256" : "8c0bb2b3e3972752e07bc48b540b9ae2e897cea8e1d53118bf9444dfea4b42dd",
+      "type" : "png",
+      "width" : 1206
+    },
     {
       "bytes" : 1154673,
       "height" : 2622,
@@ -50,12 +58,12 @@
       "width" : 1206
     },
     {
-      "bytes" : 144626,
-      "height" : 1440,
+      "bytes" : 137079,
+      "height" : 1280,
       "path" : "artifacts/ios-simulator-report-export-files-reopen-narrated.gif",
-      "sha256" : "c9635f3f775e5470d12148bb0aa1d20c8d2f13faf2753212b5358f05ee75ab8b",
+      "sha256" : "8914d6378eb79c6c59682a34b004cd82e2bd4d7f6da9428e6cb6eae246a9424b",
       "type" : "gif",
-      "width" : 663
+      "width" : 878
     },
     {
       "bytes" : 52126,
@@ -146,6 +154,6 @@
       "width" : 1206
     }
   ],
-  "mediaCount" : 18,
+  "mediaCount" : 19,
   "repository" : "jungyeons/iOSAppHackingLab"
 }

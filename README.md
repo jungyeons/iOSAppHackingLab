@@ -1,6 +1,7 @@
 # iOSAppHackingLab
 
 [![Self Check](https://github.com/jungyeons/iOSAppHackingLab/actions/workflows/self-check.yml/badge.svg)](https://github.com/jungyeons/iOSAppHackingLab/actions/workflows/self-check.yml)
+[![Demo Media Manifest](https://img.shields.io/badge/demo%20media-manifest-blue)](artifacts/media-manifest.json)
 
 iOS 앱 해킹 공부를 위해 SwiftUI로 만든 로컬 실습 앱입니다. 실제 서비스나 타인 앱을 대상으로 하지 않고, 의도적으로 취약하게 만든 앱 안에서만 관찰하고 실험하도록 구성했습니다.
 
@@ -49,6 +50,10 @@ The same SwiftUI lab runs as a Swift Package app on macOS and as a native Xcode 
 | --- | --- |
 | ![Local override denied](artifacts/ios-simulator-entitlement-override.png) | ![Server-authorized premium](artifacts/ios-simulator-entitlement-paid.png) |
 
+| Signed entitlement API client mock |
+| --- |
+| ![Signed entitlement API client mock](artifacts/ios-simulator-entitlement-api-client-mock.png) |
+
 | Export ready | Storage picker | Export saved |
 | --- | --- | --- |
 | ![Export ready](artifacts/ios-simulator-report-export-location-ready.png) | ![Storage picker](artifacts/ios-simulator-report-export-location-picker.png) | ![Export saved](artifacts/ios-simulator-report-export-saved-location.png) |
@@ -71,7 +76,7 @@ The same SwiftUI lab runs as a Swift Package app on macOS and as a native Xcode 
 - Swift async signed entitlement API client stub와 앱 화면 live mock action
 - 증거 캡처 체크리스트와 포트폴리오용 takeaway 정리
 - `--self-check` 내장 검증 모드
-- GitHub Actions 기반 self-check CI와 screenshot dimension 검증
+- GitHub Actions 기반 self-check CI, screenshot dimension 검증, media manifest artifact
 - Xcode 기반 iOS Simulator 타깃
 - LLDB/Frida 관찰용 lab-only runtime probe
 - 시뮬레이터 스크린샷과 짧은 demo GIF
@@ -132,6 +137,7 @@ swift tools/generate-media-manifest.swift
 xcrun simctl list devices available
 xcrun simctl launch --terminate-running-process booted com.jungyeons.iosapphackinglab --lab tamperable-state --demo entitlement-override
 xcrun simctl launch --terminate-running-process booted com.jungyeons.iosapphackinglab --lab tamperable-state --demo entitlement-paid
+xcrun simctl launch --terminate-running-process booted com.jungyeons.iosapphackinglab --lab tamperable-state --demo entitlement-api-mock
 xcrun simctl launch --terminate-running-process booted com.jungyeons.iosapphackinglab --demo sanitized-report-exported
 swift tools/make-demo-gif.swift artifacts/ios-simulator-runtime-demo.gif \
   artifacts/ios-simulator-runtime-run.png \
@@ -147,7 +153,7 @@ swift tools/make-demo-gif.swift artifacts/ios-simulator-report-export-location-f
 swift tools/make-demo-gif.swift artifacts/ios-simulator-report-export-files-reopen.gif \
   artifacts/ios-simulator-report-export-files-recent.png \
   artifacts/ios-simulator-report-export-files-preview.png
-swift tools/make-captioned-demo-gif.swift artifacts/ios-simulator-report-export-files-reopen-narrated.gif \
+swift tools/make-captioned-demo-gif.swift --mobile-crop artifacts/ios-simulator-report-export-files-reopen-narrated.gif \
   'artifacts/ios-simulator-report-export-files-recent.png::1. Files shows the exported sanitized report in Recents.' \
   'artifacts/ios-simulator-report-export-files-preview.png::2. Preview reopens the Markdown without exposing raw secrets.'
 ```
@@ -167,6 +173,6 @@ swift tools/make-captioned-demo-gif.swift artifacts/ios-simulator-report-export-
 
 ## 다음 단계
 
-- API client mock 결과를 별도 entitlement screenshot으로 캡처
-- Media manifest를 README badge 또는 release note에 연결
-- Files 앱 export 재오픈 narrated GIF를 더 짧은 mobile crop으로 다듬기
+- API client mock 흐름을 짧은 GIF로 추가
+- Media manifest 내용을 release note 템플릿에도 요약
+- Sanitized report export 이력을 앱 안에서 다시 볼 수 있는 history panel 추가

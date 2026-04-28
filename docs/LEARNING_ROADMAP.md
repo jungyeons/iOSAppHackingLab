@@ -51,3 +51,6 @@ This roadmap keeps the project useful as a portfolio artifact while staying insi
 - [x] Wire the signed entitlement API client stub into an in-app live mock action.
 - [x] Generate a media manifest for the Actions artifact.
 - [x] Add a narrated Files app export-reopen GIF.
+- [x] Capture the API client mock result as a separate entitlement screenshot.
+- [x] Link the media manifest from the README badge row.
+- [x] Trim the narrated Files app export-reopen GIF with a shorter mobile crop.

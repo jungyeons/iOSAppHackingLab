@@ -6,11 +6,16 @@ import ImageIO
 import UniformTypeIdentifiers
 
 func usage() -> Never {
-    fputs("Usage: swift tools/make-captioned-demo-gif.swift output.gif frame.png::Caption [...]\n", stderr)
+    fputs("Usage: swift tools/make-captioned-demo-gif.swift [--mobile-crop] output.gif frame.png::Caption [...]\n", stderr)
     exit(64)
 }
 
-let arguments = Array(CommandLine.arguments.dropFirst())
+var arguments = Array(CommandLine.arguments.dropFirst())
+let shouldCropForMobile = arguments.first == "--mobile-crop"
+if shouldCropForMobile {
+    arguments.removeFirst()
+}
+
 guard arguments.count >= 2 else {
     usage()
 }
@@ -18,8 +23,8 @@ guard arguments.count >= 2 else {
 let outputPath = arguments[0]
 let frameSpecs = Array(arguments.dropFirst())
 let outputURL = URL(fileURLWithPath: outputPath)
-let frameDelay = 1.55
-let maxPixelHeight: CGFloat = 720
+let frameDelay = shouldCropForMobile ? 1.15 : 1.55
+let maxPixelHeight: CGFloat = shouldCropForMobile ? 640 : 720
 
 guard let gifType = UTType.gif.identifier as CFString?,
       let destination = CGImageDestinationCreateWithURL(outputURL as CFURL, gifType, frameSpecs.count, nil) else {
@@ -44,7 +49,7 @@ for spec in frameSpecs {
     let caption = parts.dropFirst().joined(separator: "::")
 
     guard let image = NSImage(contentsOfFile: path),
-          let rendered = render(image: image, caption: caption)
+          let rendered = render(image: image, caption: caption, shouldCropForMobile: shouldCropForMobile)
     else {
         fputs("Could not render \(path).\n", stderr)
         exit(1)
@@ -68,10 +73,23 @@ guard CGImageDestinationFinalize(destination) else {
 
 print("Wrote \(outputPath)")
 
-func render(image: NSImage, caption: String) -> CGImage? {
+func render(image: NSImage, caption: String, shouldCropForMobile: Bool) -> CGImage? {
     let sourceSize = image.size
-    let scale = maxPixelHeight / sourceSize.height
-    let size = NSSize(width: sourceSize.width * scale, height: maxPixelHeight)
+    let sourceRect: NSRect
+    if shouldCropForMobile {
+        let cropHeight = min(sourceSize.height, 1_760)
+        sourceRect = NSRect(
+            x: 0,
+            y: sourceSize.height - cropHeight,
+            width: sourceSize.width,
+            height: cropHeight
+        )
+    } else {
+        sourceRect = NSRect(origin: .zero, size: sourceSize)
+    }
+
+    let scale = maxPixelHeight / sourceRect.height
+    let size = NSSize(width: sourceRect.width * scale, height: maxPixelHeight)
     let output = NSImage(size: size)
 
     output.lockFocus()
@@ -80,12 +98,12 @@ func render(image: NSImage, caption: String) -> CGImage? {
 
     image.draw(
         in: NSRect(origin: .zero, size: size),
-        from: NSRect(origin: .zero, size: sourceSize),
+        from: sourceRect,
         operation: .copy,
         fraction: 1.0
     )
 
-    let captionHeight: CGFloat = 86
+    let captionHeight: CGFloat = shouldCropForMobile ? 74 : 86
     let captionRect = NSRect(x: 0, y: 0, width: size.width, height: captionHeight)
     NSColor(calibratedWhite: 0.0, alpha: 0.72).setFill()
     captionRect.fill()
@@ -95,11 +113,11 @@ func render(image: NSImage, caption: String) -> CGImage? {
     paragraph.lineBreakMode = .byWordWrapping
 
     let attributes: [NSAttributedString.Key: Any] = [
-        .font: NSFont.systemFont(ofSize: 18, weight: .semibold),
+        .font: NSFont.systemFont(ofSize: shouldCropForMobile ? 13 : 18, weight: .semibold),
         .foregroundColor: NSColor.white,
         .paragraphStyle: paragraph
     ]
-    let textRect = captionRect.insetBy(dx: 18, dy: 18)
+    let textRect = captionRect.insetBy(dx: shouldCropForMobile ? 12 : 18, dy: shouldCropForMobile ? 14 : 18)
     caption.draw(in: textRect, withAttributes: attributes)
 
     output.unlockFocus()

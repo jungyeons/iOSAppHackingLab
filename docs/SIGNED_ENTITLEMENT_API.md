@@ -123,6 +123,8 @@ The stub deliberately does not persist raw session tokens or account identifiers
 
 The Tamperable Entitlement lab connects the client stub to a live SwiftUI action: `Run API Client Mock`.
 
+![Signed entitlement API client mock](../artifacts/ios-simulator-entitlement-api-client-mock.png)
+
 That button uses `MockSignedEntitlementAPISession` as a local stand-in for the server. It performs the same async client flow as a real integration:
 
 1. Fetch the issuer key set.
@@ -132,6 +134,13 @@ That button uses `MockSignedEntitlementAPISession` as a local stand-in for the s
 5. Update the UI premium state from the accepted mock claim.
 
 Use `paid@example.com` or `portfolio-reviewer@example.com` to exercise the premium mock response. Other accounts return a signed free-plan response. The console redacts the mock session token and displays only portfolio-safe metadata.
+
+Capture the mock result directly from the simulator with:
+
+```bash
+xcrun simctl launch --terminate-running-process booted com.jungyeons.iosapphackinglab --lab tamperable-state --demo entitlement-api-mock
+xcrun simctl io booted screenshot artifacts/ios-simulator-entitlement-api-client-mock.png
+```
 
 ## Status Codes
 

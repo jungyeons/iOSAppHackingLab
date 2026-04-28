@@ -21,7 +21,7 @@ This flow captures the in-app path for exporting a public-safe study report from
 
 ![Files app reopen flow](../artifacts/ios-simulator-report-export-files-reopen.gif)
 
-![Narrated Files app reopen flow](../artifacts/ios-simulator-report-export-files-reopen-narrated.gif)
+![Mobile-cropped narrated Files app reopen flow](../artifacts/ios-simulator-report-export-files-reopen-narrated.gif)
 
 | Files recent item | Reopened sanitized report |
 | --- | --- |
@@ -33,6 +33,7 @@ This flow captures the in-app path for exporting a public-safe study report from
 - The file exporter screenshot documents the user-controlled storage destination before the report is written.
 - The saved status screenshot documents the app completion state after `fileExporter` returns success.
 - The Files app screenshots show the exported Markdown as a recent file and then reopened in the system preview.
+- The narrated GIF uses a shorter mobile crop so the reopen proof stays readable in the README and Actions artifact preview.
 
 ## Reproduce
 
@@ -53,7 +54,7 @@ Open the `iOSAppHackingLab-Sanitized-Study-Report.md` recent item and capture th
 Build the narrated GIF from those two frames:
 
 ```bash
-swift tools/make-captioned-demo-gif.swift artifacts/ios-simulator-report-export-files-reopen-narrated.gif \
+swift tools/make-captioned-demo-gif.swift --mobile-crop artifacts/ios-simulator-report-export-files-reopen-narrated.gif \
   'artifacts/ios-simulator-report-export-files-recent.png::1. Files shows the exported sanitized report in Recents.' \
   'artifacts/ios-simulator-report-export-files-preview.png::2. Preview reopens the Markdown without exposing raw secrets.'
 ```

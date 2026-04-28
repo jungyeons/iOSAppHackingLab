@@ -38,6 +38,8 @@ swift tools/generate-media-manifest.swift
 
 The manifest records every public demo media file with path, type, pixel dimensions, byte count, and SHA-256 digest. It is uploaded with the artifact so reviewers can audit exactly which screenshots and GIFs were attached to the CI run.
 
+The README links to the checked-in manifest with the `Demo Media Manifest` badge so the same media inventory is visible from the repository front page and from the Actions artifact.
+
 ## Why Upload These
 
 - Screenshots and GIFs stay attached to the exact CI run that validated the code.
