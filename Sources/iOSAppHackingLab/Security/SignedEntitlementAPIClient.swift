@@ -6,6 +6,84 @@ protocol EntitlementAPISession {
 
 extension URLSession: EntitlementAPISession {}
 
+struct MockSignedEntitlementAPISession: EntitlementAPISession {
+    func data(for request: URLRequest) async throws -> (Data, URLResponse) {
+        let path = request.url?.path ?? ""
+        let responseURL = request.url ?? URL(string: "https://api.example.test")!
+
+        switch (request.httpMethod, path) {
+        case ("GET", "/.well-known/iosapphackinglab-entitlement-keys.json"):
+            return try jsonResponse(
+                [
+                    "issuer": "https://api.example.test",
+                    "keys": [
+                        [
+                            "kid": "entitlement-p256-2026-04",
+                            "alg": "ES256",
+                            "kty": "EC",
+                            "crv": "P-256",
+                            "use": "sig",
+                            "x": "base64url-public-x",
+                            "y": "base64url-public-y",
+                            "expiresAt": "2026-07-01T00:00:00Z"
+                        ]
+                    ]
+                ],
+                url: responseURL
+            )
+        case ("POST", "/v1/entitlements/claims"):
+            let token = request.value(forHTTPHeaderField: "Authorization") ?? ""
+            let isPremium = token.contains("mock-paid-session")
+            let plan = isPremium ? "premium" : "free"
+            let claimID = isPremium ? "claim_mock_paid_0001" : "claim_mock_free_0001"
+            let subject = isPremium ? "acct_hash_paid_mock" : "acct_hash_free_mock"
+
+            return try jsonResponse(
+                [
+                    "claim": [
+                        "iss": "https://api.example.test",
+                        "aud": SignedEntitlementAPIClient.defaultAudience,
+                        "sub": subject,
+                        "plan": plan,
+                        "premium": isPremium,
+                        "scope": isPremium ? ["lab.read", "premium.demo"] : ["lab.read"],
+                        "iat": "2026-04-28T00:00:00Z",
+                        "exp": "2026-04-29T00:00:00Z",
+                        "jti": claimID
+                    ],
+                    "signature": [
+                        "alg": "ES256",
+                        "kid": "entitlement-p256-2026-04",
+                        "value": "base64url-es256-signature-\(plan)"
+                    ]
+                ],
+                url: responseURL
+            )
+        default:
+            return try jsonResponse(
+                ["error": "not_found"],
+                statusCode: 404,
+                url: responseURL
+            )
+        }
+    }
+
+    private func jsonResponse(
+        _ object: [String: Any],
+        statusCode: Int = 200,
+        url: URL
+    ) throws -> (Data, URLResponse) {
+        let data = try JSONSerialization.data(withJSONObject: object, options: [.sortedKeys])
+        let response = HTTPURLResponse(
+            url: url,
+            statusCode: statusCode,
+            httpVersion: "HTTP/1.1",
+            headerFields: ["Content-Type": "application/json"]
+        )!
+        return (data, response)
+    }
+}
+
 struct SignedEntitlementAPIClient {
     static let defaultAudience = "com.jungyeons.iosapphackinglab"
 

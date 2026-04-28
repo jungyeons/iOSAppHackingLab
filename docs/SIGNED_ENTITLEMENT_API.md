@@ -119,6 +119,20 @@ let response = try await client.requestClaim(
 
 The stub deliberately does not persist raw session tokens or account identifiers. Verification logic should still check the returned signature and claim fields before granting access.
 
+## In-App Mock Action
+
+The Tamperable Entitlement lab connects the client stub to a live SwiftUI action: `Run API Client Mock`.
+
+That button uses `MockSignedEntitlementAPISession` as a local stand-in for the server. It performs the same async client flow as a real integration:
+
+1. Fetch the issuer key set.
+2. Request a signed entitlement claim.
+3. Decode the claim envelope.
+4. Check issuer, audience, key ID, and algorithm.
+5. Update the UI premium state from the accepted mock claim.
+
+Use `paid@example.com` or `portfolio-reviewer@example.com` to exercise the premium mock response. Other accounts return a signed free-plan response. The console redacts the mock session token and displays only portfolio-safe metadata.
+
 ## Status Codes
 
 | Status | Meaning | Client behavior |

@@ -21,6 +21,8 @@ This flow captures the in-app path for exporting a public-safe study report from
 
 ![Files app reopen flow](../artifacts/ios-simulator-report-export-files-reopen.gif)
 
+![Narrated Files app reopen flow](../artifacts/ios-simulator-report-export-files-reopen-narrated.gif)
+
 | Files recent item | Reopened sanitized report |
 | --- | --- |
 | ![Files recent item](../artifacts/ios-simulator-report-export-files-recent.png) | ![Reopened sanitized report](../artifacts/ios-simulator-report-export-files-preview.png) |
@@ -47,3 +49,11 @@ xcrun simctl launch booted com.apple.DocumentsApp
 ```
 
 Open the `iOSAppHackingLab-Sanitized-Study-Report.md` recent item and capture the preview with `xcrun simctl io booted screenshot`.
+
+Build the narrated GIF from those two frames:
+
+```bash
+swift tools/make-captioned-demo-gif.swift artifacts/ios-simulator-report-export-files-reopen-narrated.gif \
+  'artifacts/ios-simulator-report-export-files-recent.png::1. Files shows the exported sanitized report in Recents.' \
+  'artifacts/ios-simulator-report-export-files-preview.png::2. Preview reopens the Markdown without exposing raw secrets.'
+```

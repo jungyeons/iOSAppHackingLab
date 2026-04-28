@@ -39,6 +39,8 @@ The same SwiftUI lab runs as a Swift Package app on macOS and as a native Xcode 
 
 ![Files app reopen flow](artifacts/ios-simulator-report-export-files-reopen.gif)
 
+![Narrated Files app reopen flow](artifacts/ios-simulator-report-export-files-reopen-narrated.gif)
+
 | Runtime run | LLDB guide | Frida observer |
 | --- | --- | --- |
 | ![Runtime run](artifacts/ios-simulator-runtime-run.png) | ![LLDB guide](artifacts/ios-simulator-runtime-lldb.png) | ![Frida observer](artifacts/ios-simulator-runtime-frida.png) |
@@ -66,7 +68,7 @@ The same SwiftUI lab runs as a Swift Package app on macOS and as a native Xcode 
 - UserDefaults와 Keychain 저장 방식 비교
 - 민감 로그와 redacted event log 비교
 - 로컬 entitlement와 서명 검증 기반 server-authoritative 모델 비교
-- Swift async signed entitlement API client stub
+- Swift async signed entitlement API client stub와 앱 화면 live mock action
 - 증거 캡처 체크리스트와 포트폴리오용 takeaway 정리
 - `--self-check` 내장 검증 모드
 - GitHub Actions 기반 self-check CI와 screenshot dimension 검증
@@ -103,6 +105,8 @@ tools/
   frida/        Lab-only Frida observer
   lldb/         Lab-only LLDB command file
   make-demo-gif.swift
+  make-captioned-demo-gif.swift
+  generate-media-manifest.swift
   verify-demo-media.swift
 ```
 
@@ -124,6 +128,7 @@ rg "lab.premium.serverClaim|SimulatedEntitlementAuthority|Verify Signed Claim" .
 swift run
 swift run iOSAppHackingLab --self-check
 swift tools/verify-demo-media.swift
+swift tools/generate-media-manifest.swift
 xcrun simctl list devices available
 xcrun simctl launch --terminate-running-process booted com.jungyeons.iosapphackinglab --lab tamperable-state --demo entitlement-override
 xcrun simctl launch --terminate-running-process booted com.jungyeons.iosapphackinglab --lab tamperable-state --demo entitlement-paid
@@ -142,6 +147,9 @@ swift tools/make-demo-gif.swift artifacts/ios-simulator-report-export-location-f
 swift tools/make-demo-gif.swift artifacts/ios-simulator-report-export-files-reopen.gif \
   artifacts/ios-simulator-report-export-files-recent.png \
   artifacts/ios-simulator-report-export-files-preview.png
+swift tools/make-captioned-demo-gif.swift artifacts/ios-simulator-report-export-files-reopen-narrated.gif \
+  'artifacts/ios-simulator-report-export-files-recent.png::1. Files shows the exported sanitized report in Recents.' \
+  'artifacts/ios-simulator-report-export-files-preview.png::2. Preview reopens the Markdown without exposing raw secrets.'
 ```
 
 ## 안전 범위
@@ -159,6 +167,6 @@ swift tools/make-demo-gif.swift artifacts/ios-simulator-report-export-files-reop
 
 ## 다음 단계
 
-- 서버 API client stub을 앱 화면의 live mock action으로 연결
-- Actions artifact에 media manifest 생성 추가
-- Files 앱 export 재오픈 흐름을 짧은 narration GIF로 보강
+- API client mock 결과를 별도 entitlement screenshot으로 캡처
+- Media manifest를 README badge 또는 release note에 연결
+- Files 앱 export 재오픈 narrated GIF를 더 짧은 mobile crop으로 다듬기

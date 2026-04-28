@@ -179,6 +179,14 @@ struct TamperableStateLab: View {
                 }
 
                 Button {
+                    Task {
+                        await labStore.requestSignedEntitlementAPIMock(account: account)
+                    }
+                } label: {
+                    Label("Run API Client Mock", systemImage: "network")
+                }
+
+                Button {
                     labStore.attemptLocalEntitlementOverride()
                 } label: {
                     Label("Try Local Override", systemImage: "exclamationmark.arrow.triangle.2.circlepath")

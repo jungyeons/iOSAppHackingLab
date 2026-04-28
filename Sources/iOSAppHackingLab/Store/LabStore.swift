@@ -383,6 +383,76 @@ final class LabStore: ObservableObject {
         """
     }
 
+    @MainActor
+    func requestSignedEntitlementAPIMock(account: String) async {
+        guard let baseURL = URL(string: "https://api.example.test") else {
+            console = "Could not create mock entitlement API base URL."
+            return
+        }
+
+        let normalizedAccount = account.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let usesPaidMockSession = normalizedAccount == "paid@example.com"
+            || normalizedAccount == "portfolio-reviewer@example.com"
+        let sessionToken = usesPaidMockSession ? "mock-paid-session" : "mock-free-session"
+        let client = SignedEntitlementAPIClient(
+            baseURL: baseURL,
+            session: MockSignedEntitlementAPISession()
+        )
+
+        console = "Calling mock signed entitlement API..."
+
+        do {
+            let keySet = try await client.fetchKeySet()
+            let response = try await client.requestClaim(
+                sessionToken: sessionToken,
+                clientVersion: "1.0.0",
+                idempotencyKey: UUID(uuidString: "00000000-0000-0000-0000-000000000777")!
+            )
+            let trustedIssuer = response.claim.iss == keySet.issuer
+            let trustedAudience = response.claim.aud == SignedEntitlementAPIClient.defaultAudience
+            let matchingKey = keySet.keys.contains { key in
+                key.kid == response.signature.kid && key.alg == response.signature.alg
+            }
+            let accepted = trustedIssuer && trustedAudience && matchingKey
+
+            serverAuthorizedPremium = accepted && response.claim.premium
+            console = """
+            Live mock signed entitlement API call:
+            GET /.well-known/iosapphackinglab-entitlement-keys.json
+            POST /v1/entitlements/claims
+
+            Request:
+            Authorization: Bearer <redacted:mock-session>
+            audience=\(SignedEntitlementAPIClient.defaultAudience)
+            accountHash=\(response.claim.sub)
+
+            Response:
+            issuer=\(response.claim.iss)
+            plan=\(response.claim.plan)
+            premium=\(response.claim.premium)
+            scope=\(response.claim.scope.joined(separator: ","))
+            claimID=\(response.claim.jti)
+            keyID=\(response.signature.kid)
+            alg=\(response.signature.alg)
+            signature=\(response.signature.value.prefix(18))...
+
+            Client checks:
+            trustedIssuer=\(trustedIssuer)
+            trustedAudience=\(trustedAudience)
+            matchingKey=\(matchingKey)
+            accepted=\(accepted)
+
+            Result: the app exercised the async API client contract with a local mock server, then updated UI authorization from the decoded signed-claim envelope.
+            """
+        } catch {
+            serverAuthorizedPremium = false
+            console = """
+            Mock signed entitlement API call failed.
+            error=\(error.localizedDescription)
+            """
+        }
+    }
+
     func attemptLocalEntitlementOverride() {
         isPremiumEnabled = true
         defaults.set(true, forKey: "lab.premium.enabled")

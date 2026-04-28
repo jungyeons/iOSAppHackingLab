@@ -48,3 +48,6 @@ This roadmap keeps the project useful as a portfolio artifact while staying insi
 - [x] Add a Swift async client stub for the signed entitlement API example.
 - [x] Validate screenshot and GIF dimensions in GitHub Actions.
 - [x] Capture reopening the exported report from the iOS Files app.
+- [x] Wire the signed entitlement API client stub into an in-app live mock action.
+- [x] Generate a media manifest for the Actions artifact.
+- [x] Add a narrated Files app export-reopen GIF.

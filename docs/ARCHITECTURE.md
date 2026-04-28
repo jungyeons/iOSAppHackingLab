@@ -42,11 +42,11 @@ The cached claim includes a hashed account, plan, premium decision, issuer key I
 
 This is a local teaching model, not a real backend. In a production app, the authoritative decision should come from a trusted service, App Store receipt validation, or a cryptographically verifiable claim whose private signing material is kept server-side, not embedded in the app. The example production contract is documented in `docs/SIGNED_ENTITLEMENT_API.md`.
 
-`SignedEntitlementAPIClient` is a Swift async stub for that production boundary. It builds the public-key discovery request, builds the signed-claim request with idempotency, and decodes the example JSON envelope. `SelfCheck` verifies the stub stays aligned with the documented API contract.
+`SignedEntitlementAPIClient` is a Swift async stub for that production boundary. It builds the public-key discovery request, builds the signed-claim request with idempotency, and decodes the example JSON envelope. The Tamperable Entitlement lab exposes this through `Run API Client Mock`, which calls the client with `MockSignedEntitlementAPISession` and updates UI authorization from the decoded claim. `SelfCheck` verifies the stub stays aligned with the documented API contract.
 
 ## Report Export Evidence
 
-`docs/REPORT_EXPORT_FLOW.md` captures the actual iOS `fileExporter` path: prepare sanitized report, tap `Export .md`, choose the storage location, save, then reopen the exported Markdown from the Files app. These images are public-safe because the generated report redacts common token, password, account, and local path patterns before export.
+`docs/REPORT_EXPORT_FLOW.md` captures the actual iOS `fileExporter` path: prepare sanitized report, tap `Export .md`, choose the storage location, save, then reopen the exported Markdown from the Files app. The narrated GIF is generated with `tools/make-captioned-demo-gif.swift`. These images are public-safe because the generated report redacts common token, password, account, and local path patterns before export.
 
 ## Current Platform Shape
 

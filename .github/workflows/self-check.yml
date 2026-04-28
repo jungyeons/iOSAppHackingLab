@@ -23,6 +23,9 @@ jobs:
       - name: Validate demo media dimensions
         run: swift tools/verify-demo-media.swift
 
+      - name: Generate media manifest
+        run: swift tools/generate-media-manifest.swift
+
       - name: Upload public demo media
         uses: actions/upload-artifact@v7
         with:
@@ -30,6 +33,7 @@ jobs:
           path: |
             artifacts/*.png
             artifacts/*.gif
+            artifacts/media-manifest.json
             docs/CI_ARTIFACTS.md
             docs/SIGNED_ENTITLEMENT_API.md
             docs/SAMPLE_STUDY_REPORT.md

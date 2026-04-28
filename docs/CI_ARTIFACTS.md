@@ -10,6 +10,7 @@ Included files:
 
 - `artifacts/*.png`
 - `artifacts/*.gif`
+- `artifacts/media-manifest.json`
 - `docs/CI_ARTIFACTS.md`
 - `docs/SIGNED_ENTITLEMENT_API.md`
 - `docs/SAMPLE_STUDY_REPORT.md`
@@ -26,6 +27,16 @@ swift tools/verify-demo-media.swift
 ```
 
 The verifier scans `artifacts/*.png` and `artifacts/*.gif`, reads dimensions through ImageIO, rejects empty files, and enforces portrait simulator media. PNG screenshots must be at least `1000x2000`; GIFs must be at least `300x600`.
+
+## Media Manifest
+
+After validation, the workflow runs:
+
+```bash
+swift tools/generate-media-manifest.swift
+```
+
+The manifest records every public demo media file with path, type, pixel dimensions, byte count, and SHA-256 digest. It is uploaded with the artifact so reviewers can audit exactly which screenshots and GIFs were attached to the CI run.
 
 ## Why Upload These
 
