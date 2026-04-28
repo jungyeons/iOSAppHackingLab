@@ -45,3 +45,6 @@ This roadmap keeps the project useful as a portfolio artifact while staying insi
 - [x] Capture actual sanitized report storage-location selection flow.
 - [x] Document a production-style signed entitlement API contract.
 - [x] Upload demo screenshots and GIFs as GitHub Actions artifacts.
+- [x] Add a Swift async client stub for the signed entitlement API example.
+- [x] Validate screenshot and GIF dimensions in GitHub Actions.
+- [x] Capture reopening the exported report from the iOS Files app.

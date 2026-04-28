@@ -12,13 +12,14 @@ enum SelfCheck {
         checkRedaction(failures: &failures)
         checkObservationProbe(failures: &failures)
         checkServerEntitlement(failures: &failures)
+        checkSignedEntitlementAPIClient(failures: &failures)
         checkReportGeneration(failures: &failures)
         checkSanitizedReportExport(failures: &failures)
 
         if failures.isEmpty {
             return SelfCheckResult(
                 didPass: true,
-                output: "Self-check passed: redaction, signed entitlement authority, observation probe, report generation, and sanitized export are working."
+                output: "Self-check passed: redaction, signed entitlement authority, signed entitlement API client, observation probe, report generation, and sanitized export are working."
             )
         }
 
@@ -138,6 +139,121 @@ enum SelfCheck {
         expect(!tamperedVerification.isTrusted, "Tampered signed entitlement should not be trusted.", failures: &failures)
         expect(!tamperedVerification.isSignatureValid, "Tampered signed entitlement signature should be invalid.", failures: &failures)
         expect(authority.cachedPremium(from: tamperedPaidClaim) == nil, "Tampered cached entitlement should not return a premium decision.", failures: &failures)
+    }
+
+    private static func checkSignedEntitlementAPIClient(failures: inout [String]) {
+        guard let baseURL = URL(string: "https://api.example.test") else {
+            failures.append("Could not create signed entitlement API base URL.")
+            return
+        }
+
+        let client = SignedEntitlementAPIClient(baseURL: baseURL)
+        let keyRequest = client.keyDiscoveryRequest()
+        expect(keyRequest.httpMethod == "GET", "Key discovery request should use GET.", failures: &failures)
+        expect(
+            keyRequest.url?.path == "/.well-known/iosapphackinglab-entitlement-keys.json",
+            "Key discovery request path is incorrect.",
+            failures: &failures
+        )
+        expect(
+            keyRequest.value(forHTTPHeaderField: "Accept") == "application/json",
+            "Key discovery request should accept JSON.",
+            failures: &failures
+        )
+
+        let idempotencyKey = UUID(uuidString: "00000000-0000-0000-0000-000000000123")!
+        let claimRequest: URLRequest
+        do {
+            claimRequest = try client.claimRequest(
+                sessionToken: "session-token-placeholder",
+                clientVersion: "1.0.0",
+                idempotencyKey: idempotencyKey
+            )
+        } catch {
+            failures.append("Could not build signed entitlement claim request: \(error)")
+            return
+        }
+
+        expect(claimRequest.httpMethod == "POST", "Claim request should use POST.", failures: &failures)
+        expect(
+            claimRequest.url?.path == "/v1/entitlements/claims",
+            "Claim request path is incorrect.",
+            failures: &failures
+        )
+        expect(
+            claimRequest.value(forHTTPHeaderField: "Authorization") == "Bearer session-token-placeholder",
+            "Claim request authorization header is incorrect.",
+            failures: &failures
+        )
+        expect(
+            claimRequest.value(forHTTPHeaderField: "Idempotency-Key") == idempotencyKey.uuidString,
+            "Claim request idempotency key is incorrect.",
+            failures: &failures
+        )
+
+        if let body = claimRequest.httpBody,
+           let decodedBody = try? JSONDecoder().decode(SignedEntitlementClaimRequest.self, from: body) {
+            expect(
+                decodedBody.audience == SignedEntitlementAPIClient.defaultAudience,
+                "Claim request body has an unexpected audience.",
+                failures: &failures
+            )
+            expect(decodedBody.deviceClass == "ios-simulator", "Claim request body has an unexpected device class.", failures: &failures)
+            expect(decodedBody.clientVersion == "1.0.0", "Claim request body has an unexpected client version.", failures: &failures)
+        } else {
+            failures.append("Claim request body could not be decoded.")
+        }
+
+        let keySetJSON = """
+        {
+          "issuer": "https://api.example.test",
+          "keys": [
+            {
+              "kid": "entitlement-p256-2026-04",
+              "alg": "ES256",
+              "kty": "EC",
+              "crv": "P-256",
+              "use": "sig",
+              "x": "base64url-public-x",
+              "y": "base64url-public-y",
+              "expiresAt": "2026-07-01T00:00:00Z"
+            }
+          ]
+        }
+        """
+        let claimJSON = """
+        {
+          "claim": {
+            "iss": "https://api.example.test",
+            "aud": "com.jungyeons.iosapphackinglab",
+            "sub": "acct_hash_2f7a3e4a",
+            "plan": "premium",
+            "premium": true,
+            "scope": ["lab.read", "premium.demo"],
+            "iat": "2026-04-27T12:00:00Z",
+            "exp": "2026-04-28T12:00:00Z",
+            "jti": "claim_01JZLABDEMO0001"
+          },
+          "signature": {
+            "alg": "ES256",
+            "kid": "entitlement-p256-2026-04",
+            "value": "base64url-es256-signature"
+          }
+        }
+        """
+
+        do {
+            let keySet = try client.decodeKeySet(from: Data(keySetJSON.utf8))
+            let response = try client.decodeClaimResponse(from: Data(claimJSON.utf8))
+
+            expect(keySet.issuer == "https://api.example.test", "Decoded key set issuer is incorrect.", failures: &failures)
+            expect(keySet.keys.first?.kid == "entitlement-p256-2026-04", "Decoded key ID is incorrect.", failures: &failures)
+            expect(response.claim.aud == SignedEntitlementAPIClient.defaultAudience, "Decoded claim audience is incorrect.", failures: &failures)
+            expect(response.claim.premium, "Decoded claim should be premium.", failures: &failures)
+            expect(response.signature.alg == "ES256", "Decoded signature algorithm is incorrect.", failures: &failures)
+        } catch {
+            failures.append("Could not decode signed entitlement API example JSON: \(error)")
+        }
     }
 
     private static func expect(_ condition: Bool, _ message: String, failures: inout [String]) {

@@ -94,6 +94,31 @@ The app should reject the claim unless all checks pass:
 - `claim.jti` has not been revoked when the app can reach the server.
 - The app treats the local cache as a hint only; sensitive server actions still require server-side authorization.
 
+## Swift Async Client Stub
+
+The lab includes a compile-checked client stub at `Sources/iOSAppHackingLab/Security/SignedEntitlementAPIClient.swift`.
+
+It models the production contract without calling a real service:
+
+- `fetchKeySet()` builds `GET /.well-known/iosapphackinglab-entitlement-keys.json`.
+- `requestClaim(...)` builds `POST /v1/entitlements/claims` with `Authorization`, `Content-Type`, and `Idempotency-Key`.
+- `SignedEntitlementClaimRequest` encodes `audience`, `deviceClass`, and `clientVersion`.
+- `SignedEntitlementAPIResponse` decodes the signed claim envelope shown above.
+- `SelfCheck` validates request construction and JSON decoding so future edits do not silently drift from this contract.
+
+Example use in a real app boundary:
+
+```swift
+let client = SignedEntitlementAPIClient(baseURL: URL(string: "https://api.example.test")!)
+let keys = try await client.fetchKeySet()
+let response = try await client.requestClaim(
+    sessionToken: sessionTokenFromSignIn,
+    clientVersion: "1.0.0"
+)
+```
+
+The stub deliberately does not persist raw session tokens or account identifiers. Verification logic should still check the returned signature and claim fields before granting access.
+
 ## Status Codes
 
 | Status | Meaning | Client behavior |

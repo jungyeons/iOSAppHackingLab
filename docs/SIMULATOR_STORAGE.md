@@ -68,6 +68,8 @@ Portfolio evidence:
 
 - `artifacts/ios-simulator-report-export-location-picker.png` shows the storage location selection UI.
 - `artifacts/ios-simulator-report-export-saved-location.png` shows the app's successful export status.
+- `artifacts/ios-simulator-report-export-files-recent.png` shows the exported Markdown in Files recent items.
+- `artifacts/ios-simulator-report-export-files-preview.png` shows the exported Markdown reopened in Files preview.
 - `docs/REPORT_EXPORT_FLOW.md` records the full capture sequence.
 
 ## Keychain Note

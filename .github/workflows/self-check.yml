@@ -20,6 +20,9 @@ jobs:
       - name: Run self-check
         run: swift run iOSAppHackingLab --self-check
 
+      - name: Validate demo media dimensions
+        run: swift tools/verify-demo-media.swift
+
       - name: Upload public demo media
         uses: actions/upload-artifact@v7
         with:

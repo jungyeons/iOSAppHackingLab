@@ -37,6 +37,8 @@ The same SwiftUI lab runs as a Swift Package app on macOS and as a native Xcode 
 
 ![Sanitized report export location flow](artifacts/ios-simulator-report-export-location-flow.gif)
 
+![Files app reopen flow](artifacts/ios-simulator-report-export-files-reopen.gif)
+
 | Runtime run | LLDB guide | Frida observer |
 | --- | --- | --- |
 | ![Runtime run](artifacts/ios-simulator-runtime-run.png) | ![LLDB guide](artifacts/ios-simulator-runtime-lldb.png) | ![Frida observer](artifacts/ios-simulator-runtime-frida.png) |
@@ -49,6 +51,10 @@ The same SwiftUI lab runs as a Swift Package app on macOS and as a native Xcode 
 | --- | --- | --- |
 | ![Export ready](artifacts/ios-simulator-report-export-location-ready.png) | ![Storage picker](artifacts/ios-simulator-report-export-location-picker.png) | ![Export saved](artifacts/ios-simulator-report-export-saved-location.png) |
 
+| Files recent item | Reopened sanitized report |
+| --- | --- |
+| ![Files recent item](artifacts/ios-simulator-report-export-files-recent.png) | ![Reopened sanitized report](artifacts/ios-simulator-report-export-files-preview.png) |
+
 ## 현재 기능
 
 - 랩별 진행률 체크
@@ -56,12 +62,14 @@ The same SwiftUI lab runs as a Swift Package app on macOS and as a native Xcode 
 - 취약 패턴과 안전한 구현 패턴 비교
 - Markdown 학습 리포트 생성
 - Sanitized Markdown 리포트 export
+- Files 앱에서 export 결과 재오픈 캡처
 - UserDefaults와 Keychain 저장 방식 비교
 - 민감 로그와 redacted event log 비교
 - 로컬 entitlement와 서명 검증 기반 server-authoritative 모델 비교
+- Swift async signed entitlement API client stub
 - 증거 캡처 체크리스트와 포트폴리오용 takeaway 정리
 - `--self-check` 내장 검증 모드
-- GitHub Actions 기반 self-check CI
+- GitHub Actions 기반 self-check CI와 screenshot dimension 검증
 - Xcode 기반 iOS Simulator 타깃
 - LLDB/Frida 관찰용 lab-only runtime probe
 - 시뮬레이터 스크린샷과 짧은 demo GIF
@@ -80,7 +88,7 @@ The same SwiftUI lab runs as a Swift Package app on macOS and as a native Xcode 
 Sources/iOSAppHackingLab/
   Models/        랩 메타데이터와 체크리스트
   Store/         진행률, 노트, 취약 동작, 리포트 생성
-  Security/      Keychain 비교 구현
+  Security/      Keychain 비교와 signed entitlement API client stub
   Views/         SwiftUI 화면과 랩별 액션 UI
 iOSAppHackingLab.xcodeproj/
   xcshareddata/  공유 Xcode scheme
@@ -95,6 +103,7 @@ tools/
   frida/        Lab-only Frida observer
   lldb/         Lab-only LLDB command file
   make-demo-gif.swift
+  verify-demo-media.swift
 ```
 
 ## 연습 순서
@@ -114,6 +123,7 @@ rg "LabObservationProbe|runRuntimeObservation" .
 rg "lab.premium.serverClaim|SimulatedEntitlementAuthority|Verify Signed Claim" .
 swift run
 swift run iOSAppHackingLab --self-check
+swift tools/verify-demo-media.swift
 xcrun simctl list devices available
 xcrun simctl launch --terminate-running-process booted com.jungyeons.iosapphackinglab --lab tamperable-state --demo entitlement-override
 xcrun simctl launch --terminate-running-process booted com.jungyeons.iosapphackinglab --lab tamperable-state --demo entitlement-paid
@@ -129,6 +139,9 @@ swift tools/make-demo-gif.swift artifacts/ios-simulator-report-export-location-f
   artifacts/ios-simulator-report-export-location-ready.png \
   artifacts/ios-simulator-report-export-location-picker.png \
   artifacts/ios-simulator-report-export-saved-location.png
+swift tools/make-demo-gif.swift artifacts/ios-simulator-report-export-files-reopen.gif \
+  artifacts/ios-simulator-report-export-files-recent.png \
+  artifacts/ios-simulator-report-export-files-preview.png
 ```
 
 ## 안전 범위
@@ -146,6 +159,6 @@ swift tools/make-demo-gif.swift artifacts/ios-simulator-report-export-location-f
 
 ## 다음 단계
 
-- 실제 서버 API 예시를 Swift async client stub으로 확장
-- Actions artifact에 자동 screenshot dimension 검증 추가
-- File export 결과를 Files 앱에서 다시 여는 캡처 추가
+- 서버 API client stub을 앱 화면의 live mock action으로 연결
+- Actions artifact에 media manifest 생성 추가
+- Files 앱 export 재오픈 흐름을 짧은 narration GIF로 보강

@@ -9,6 +9,7 @@ This flow captures the in-app path for exporting a public-safe study report from
 3. In the iOS file exporter, choose the storage location. The captured simulator run uses `나의 iPhone` (`On My iPhone`).
 4. Press `저장` (`Save`).
 5. Confirm the app status changes to `Exported sanitized Markdown report`.
+6. Open the Files app and reopen the exported Markdown from `최근 항목` (`Recents`).
 
 ## Captured Flow
 
@@ -18,11 +19,18 @@ This flow captures the in-app path for exporting a public-safe study report from
 | --- | --- | --- |
 | ![Ready to export](../artifacts/ios-simulator-report-export-location-ready.png) | ![Choose storage location](../artifacts/ios-simulator-report-export-location-picker.png) | ![Export saved](../artifacts/ios-simulator-report-export-saved-location.png) |
 
+![Files app reopen flow](../artifacts/ios-simulator-report-export-files-reopen.gif)
+
+| Files recent item | Reopened sanitized report |
+| --- | --- |
+| ![Files recent item](../artifacts/ios-simulator-report-export-files-recent.png) | ![Reopened sanitized report](../artifacts/ios-simulator-report-export-files-preview.png) |
+
 ## Evidence Notes
 
 - The report preview contains sanitized portfolio text, not raw lab tokens, passwords, accounts, or local filesystem paths.
 - The file exporter screenshot documents the user-controlled storage destination before the report is written.
 - The saved status screenshot documents the app completion state after `fileExporter` returns success.
+- The Files app screenshots show the exported Markdown as a recent file and then reopened in the system preview.
 
 ## Reproduce
 
@@ -31,3 +39,11 @@ xcrun simctl launch --terminate-running-process booted com.jungyeons.iosapphacki
 ```
 
 Then press `Export .md`, choose a location, and save.
+
+To capture the reopen proof, launch Files after saving:
+
+```bash
+xcrun simctl launch booted com.apple.DocumentsApp
+```
+
+Open the `iOSAppHackingLab-Sanitized-Study-Report.md` recent item and capture the preview with `xcrun simctl io booted screenshot`.

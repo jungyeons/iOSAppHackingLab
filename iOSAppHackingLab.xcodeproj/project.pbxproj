@@ -18,6 +18,7 @@
 		100000000000000000000009 /* LabActionViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000009 /* LabActionViews.swift */; };
 		10000000000000000000000A /* SharedViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000A /* SharedViews.swift */; };
 		10000000000000000000000B /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000B /* Security.framework */; };
+		10000000000000000000000C /* SignedEntitlementAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000D /* SignedEntitlementAPIClient.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,6 +34,7 @@
 		20000000000000000000000A /* SharedViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedViews.swift; sourceTree = "<group>"; };
 		20000000000000000000000B /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		20000000000000000000000C /* iOSAppHackingLab.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iOSAppHackingLab.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		20000000000000000000000D /* SignedEntitlementAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignedEntitlementAPIClient.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +84,7 @@
 			children = (
 				200000000000000000000004 /* KeychainService.swift */,
 				200000000000000000000005 /* RedactingLogger.swift */,
+				20000000000000000000000D /* SignedEntitlementAPIClient.swift */,
 			);
 			path = Security;
 			sourceTree = "<group>";
@@ -194,6 +197,7 @@
 				100000000000000000000003 /* LabChallenge.swift in Sources */,
 				100000000000000000000004 /* KeychainService.swift in Sources */,
 				100000000000000000000005 /* RedactingLogger.swift in Sources */,
+				10000000000000000000000C /* SignedEntitlementAPIClient.swift in Sources */,
 				100000000000000000000006 /* LabStore.swift in Sources */,
 				100000000000000000000007 /* ContentView.swift in Sources */,
 				100000000000000000000008 /* ChallengeDetail.swift in Sources */,

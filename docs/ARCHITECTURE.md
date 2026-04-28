@@ -6,7 +6,7 @@ iOSAppHackingLab shares one SwiftUI codebase between a Swift Package macOS app a
 
 - `Models`: data-driven lab definitions, including risk text, inspection hints, evidence prompts, and completion criteria.
 - `Store`: observable app state for progress, notes, lab actions, Markdown report generation, and sanitized report export.
-- `Security`: platform API wrappers and helpers used for safer comparisons, such as Keychain storage and redacted logging.
+- `Security`: platform API wrappers and helpers used for safer comparisons, such as Keychain storage, redacted logging, and a signed entitlement API client stub.
 - `SelfCheck`: command-line validation for core redaction and report-generation behavior.
 - `Views`: SwiftUI navigation, lab detail pages, reusable sections, and lab action panels.
 - `iOSAppHackingLab.xcodeproj`: native iOS app target and shared scheme for Simulator builds.
@@ -21,7 +21,8 @@ iOSAppHackingLab shares one SwiftUI codebase between a Swift Package macOS app a
 5. `ChallengeDetail` exposes a sanitized report export flow using SwiftUI `fileExporter` and a Markdown `FileDocument`.
 6. `swift run iOSAppHackingLab --self-check` runs isolated checks without launching the app window.
 7. `xcodebuild` builds the same Swift sources into `iOSAppHackingLab.app` for iOS Simulator.
-8. GitHub Actions uploads sanitized screenshots, GIFs, and selected docs as `iosapphackinglab-demo-media`.
+8. `tools/verify-demo-media.swift` validates screenshot and GIF dimensions in CI.
+9. GitHub Actions uploads sanitized screenshots, GIFs, and selected docs as `iosapphackinglab-demo-media`.
 
 ## Persistence
 
@@ -41,9 +42,11 @@ The cached claim includes a hashed account, plan, premium decision, issuer key I
 
 This is a local teaching model, not a real backend. In a production app, the authoritative decision should come from a trusted service, App Store receipt validation, or a cryptographically verifiable claim whose private signing material is kept server-side, not embedded in the app. The example production contract is documented in `docs/SIGNED_ENTITLEMENT_API.md`.
 
+`SignedEntitlementAPIClient` is a Swift async stub for that production boundary. It builds the public-key discovery request, builds the signed-claim request with idempotency, and decodes the example JSON envelope. `SelfCheck` verifies the stub stays aligned with the documented API contract.
+
 ## Report Export Evidence
 
-`docs/REPORT_EXPORT_FLOW.md` captures the actual iOS `fileExporter` path: prepare sanitized report, tap `Export .md`, choose the storage location, and save. These images are public-safe because the generated report redacts common token, password, account, and local path patterns before export.
+`docs/REPORT_EXPORT_FLOW.md` captures the actual iOS `fileExporter` path: prepare sanitized report, tap `Export .md`, choose the storage location, save, then reopen the exported Markdown from the Files app. These images are public-safe because the generated report redacts common token, password, account, and local path patterns before export.
 
 ## Current Platform Shape
 
