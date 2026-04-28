@@ -15,6 +15,7 @@ Included files:
 - `docs/SIGNED_ENTITLEMENT_API.md`
 - `docs/SAMPLE_STUDY_REPORT.md`
 - `docs/REPORT_EXPORT_FLOW.md`
+- `docs/RELEASE_NOTES_TEMPLATE.md`
 
 The artifact intentionally excludes simulator containers, generated private notes, raw logs, and local exported Markdown files.
 
@@ -39,6 +40,8 @@ swift tools/generate-media-manifest.swift
 The manifest records every public demo media file with path, type, pixel dimensions, byte count, and SHA-256 digest. It is uploaded with the artifact so reviewers can audit exactly which screenshots and GIFs were attached to the CI run.
 
 The README links to the checked-in manifest with the `Demo Media Manifest` badge so the same media inventory is visible from the repository front page and from the Actions artifact.
+
+The release notes template summarizes the same manifest in reviewer-friendly form: media count, PNG/GIF split, total bytes, validation commands, and the artifact name.
 
 ## Why Upload These
 

@@ -38,6 +38,7 @@ jobs:
             docs/SIGNED_ENTITLEMENT_API.md
             docs/SAMPLE_STUDY_REPORT.md
             docs/REPORT_EXPORT_FLOW.md
+            docs/RELEASE_NOTES_TEMPLATE.md
           if-no-files-found: error
           retention-days: 30
           compression-level: 0

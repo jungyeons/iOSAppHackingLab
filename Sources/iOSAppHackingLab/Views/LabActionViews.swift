@@ -119,6 +119,7 @@ struct TamperableStateLab: View {
 
     init() {
         let demoAccount = AppLaunchOptions.demoMode == "entitlement-paid"
+            || AppLaunchOptions.demoMode == "entitlement-api-mock"
             ? "paid@example.com"
             : "student@example.com"
         _account = State(initialValue: demoAccount)

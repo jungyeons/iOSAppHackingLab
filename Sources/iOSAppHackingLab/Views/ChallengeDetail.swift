@@ -139,6 +139,8 @@ struct ChallengeDetail: View {
                             .foregroundStyle(.secondary)
                     }
 
+                    ReportExportHistoryPanel(items: labStore.sanitizedReportExportHistory)
+
                     if !labStore.report.isEmpty {
                         ConsoleOutput(text: labStore.report, minHeight: 180)
                     }
@@ -172,6 +174,71 @@ struct ChallengeDetail: View {
             onCompletion: labStore.handleSanitizedReportExport
         )
         .background(Color.labWindowBackground)
+    }
+}
+
+struct ReportExportHistoryPanel: View {
+    let items: [ReportExportHistoryItem]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Divider()
+
+            Label("Export History", systemImage: "clock.arrow.circlepath")
+                .font(.headline)
+
+            if items.isEmpty {
+                Text("No sanitized report export history yet.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+            } else {
+                VStack(alignment: .leading, spacing: 10) {
+                    ForEach(items) { item in
+                        HStack(alignment: .top, spacing: 10) {
+                            Image(systemName: iconName(for: item.status))
+                                .foregroundStyle(tint(for: item.status))
+                                .frame(width: 22)
+
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(item.title)
+                                    .font(.subheadline.weight(.semibold))
+
+                                Text(item.detail)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(2)
+
+                                Text(item.createdAt, format: .dateTime.month().day().hour().minute())
+                                    .font(.caption2)
+                                    .foregroundStyle(.tertiary)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func iconName(for status: ReportExportHistoryItem.Status) -> String {
+        switch status {
+        case .prepared:
+            return "doc.badge.gearshape"
+        case .exported:
+            return "square.and.arrow.up"
+        case .failed:
+            return "exclamationmark.triangle"
+        }
+    }
+
+    private func tint(for status: ReportExportHistoryItem.Status) -> Color {
+        switch status {
+        case .prepared:
+            return .blue
+        case .exported:
+            return .green
+        case .failed:
+            return .orange
+        }
     }
 }
 

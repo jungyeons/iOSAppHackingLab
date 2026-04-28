@@ -27,6 +27,10 @@ This flow captures the in-app path for exporting a public-safe study report from
 | --- | --- |
 | ![Files recent item](../artifacts/ios-simulator-report-export-files-recent.png) | ![Reopened sanitized report](../artifacts/ios-simulator-report-export-files-preview.png) |
 
+| Export history panel |
+| --- |
+| ![Export history panel](../artifacts/ios-simulator-report-export-history.png) |
+
 ## Evidence Notes
 
 - The report preview contains sanitized portfolio text, not raw lab tokens, passwords, accounts, or local filesystem paths.
@@ -34,6 +38,7 @@ This flow captures the in-app path for exporting a public-safe study report from
 - The saved status screenshot documents the app completion state after `fileExporter` returns success.
 - The Files app screenshots show the exported Markdown as a recent file and then reopened in the system preview.
 - The narrated GIF uses a shorter mobile crop so the reopen proof stays readable in the README and Actions artifact preview.
+- The in-app history panel records sanitized report preparation, export success, and export failure events with redacted details.
 
 ## Reproduce
 

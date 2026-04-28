@@ -113,6 +113,27 @@ enum SelfCheck {
         expect(!store.sanitizedReport.contains("student@example.com"), "Sanitized report contains a raw email.", failures: &failures)
         expect(!store.sanitizedReport.contains("passw0rd"), "Sanitized report contains a raw password sample.", failures: &failures)
         expect(!store.sanitizedReport.contains("lab-token-super-secret"), "Sanitized report contains a raw token.", failures: &failures)
+        expect(store.sanitizedReportExportHistory.count == 1, "Sanitized report preparation was not added to export history.", failures: &failures)
+        expect(store.sanitizedReportExportHistory.first?.status == .prepared, "Sanitized report history did not record the prepared state.", failures: &failures)
+
+        store.handleSanitizedReportExport(
+            .success(URL(fileURLWithPath: "/tmp/student@example.com-report.md"))
+        )
+
+        expect(store.sanitizedReportExportHistory.count == 2, "Sanitized report export was not added to export history.", failures: &failures)
+        expect(store.sanitizedReportExportHistory.first?.status == .exported, "Sanitized report history did not record the exported state.", failures: &failures)
+        expect(
+            store.sanitizedReportExportHistory.first?.detail.contains("student@example.com") == false,
+            "Sanitized report export history contains a raw email.",
+            failures: &failures
+        )
+
+        let reloadedStore = LabStore(defaults: defaults)
+        expect(
+            reloadedStore.sanitizedReportExportHistory.first?.status == .exported,
+            "Sanitized report export history was not persisted.",
+            failures: &failures
+        )
     }
 
     private static func checkServerEntitlement(failures: inout [String]) {

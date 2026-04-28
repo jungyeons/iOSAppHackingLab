@@ -42,6 +42,8 @@ The same SwiftUI lab runs as a Swift Package app on macOS and as a native Xcode 
 
 ![Narrated Files app reopen flow](artifacts/ios-simulator-report-export-files-reopen-narrated.gif)
 
+![Signed entitlement API client mock flow](artifacts/ios-simulator-entitlement-api-client-mock.gif)
+
 | Runtime run | LLDB guide | Frida observer |
 | --- | --- | --- |
 | ![Runtime run](artifacts/ios-simulator-runtime-run.png) | ![LLDB guide](artifacts/ios-simulator-runtime-lldb.png) | ![Frida observer](artifacts/ios-simulator-runtime-frida.png) |
@@ -53,6 +55,10 @@ The same SwiftUI lab runs as a Swift Package app on macOS and as a native Xcode 
 | Signed entitlement API client mock |
 | --- |
 | ![Signed entitlement API client mock](artifacts/ios-simulator-entitlement-api-client-mock.png) |
+
+| Sanitized report export history |
+| --- |
+| ![Sanitized report export history](artifacts/ios-simulator-report-export-history.png) |
 
 | Export ready | Storage picker | Export saved |
 | --- | --- | --- |
@@ -69,6 +75,7 @@ The same SwiftUI lab runs as a Swift Package app on macOS and as a native Xcode 
 - 취약 패턴과 안전한 구현 패턴 비교
 - Markdown 학습 리포트 생성
 - Sanitized Markdown 리포트 export
+- Sanitized report export history panel
 - Files 앱에서 export 결과 재오픈 캡처
 - UserDefaults와 Keychain 저장 방식 비교
 - 민감 로그와 redacted event log 비교
@@ -103,6 +110,7 @@ docs/
   ARCHITECTURE.md
   INSTRUMENTATION.md
   LEARNING_ROADMAP.md
+  RELEASE_NOTES_TEMPLATE.md
   SAMPLE_STUDY_REPORT.md
   SECURITY_SCOPE.md
   SIMULATOR_STORAGE.md
@@ -153,6 +161,9 @@ swift tools/make-demo-gif.swift artifacts/ios-simulator-report-export-location-f
 swift tools/make-demo-gif.swift artifacts/ios-simulator-report-export-files-reopen.gif \
   artifacts/ios-simulator-report-export-files-recent.png \
   artifacts/ios-simulator-report-export-files-preview.png
+swift tools/make-demo-gif.swift artifacts/ios-simulator-entitlement-api-client-mock.gif \
+  artifacts/ios-simulator-entitlement-api-client-ready.png \
+  artifacts/ios-simulator-entitlement-api-client-mock.png
 swift tools/make-captioned-demo-gif.swift --mobile-crop artifacts/ios-simulator-report-export-files-reopen-narrated.gif \
   'artifacts/ios-simulator-report-export-files-recent.png::1. Files shows the exported sanitized report in Recents.' \
   'artifacts/ios-simulator-report-export-files-preview.png::2. Preview reopens the Markdown without exposing raw secrets.'
@@ -169,10 +180,11 @@ swift tools/make-captioned-demo-gif.swift --mobile-crop artifacts/ios-simulator-
 - [Sanitized report export flow](docs/REPORT_EXPORT_FLOW.md)
 - [Signed entitlement API contract](docs/SIGNED_ENTITLEMENT_API.md)
 - [GitHub Actions demo artifacts](docs/CI_ARTIFACTS.md)
+- [Release notes template](docs/RELEASE_NOTES_TEMPLATE.md)
 - [Sanitized sample study report](docs/SAMPLE_STUDY_REPORT.md)
 
 ## 다음 단계
 
-- API client mock 흐름을 짧은 GIF로 추가
-- Media manifest 내용을 release note 템플릿에도 요약
-- Sanitized report export 이력을 앱 안에서 다시 볼 수 있는 history panel 추가
+- API client mock 흐름에 captioned GIF 변형 추가
+- Release note 템플릿을 GitHub release draft에 맞춰 자동 생성
+- Export history panel에 artifact 링크 필드 추가

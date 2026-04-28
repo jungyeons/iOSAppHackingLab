@@ -54,3 +54,6 @@ This roadmap keeps the project useful as a portfolio artifact while staying insi
 - [x] Capture the API client mock result as a separate entitlement screenshot.
 - [x] Link the media manifest from the README badge row.
 - [x] Trim the narrated Files app export-reopen GIF with a shorter mobile crop.
+- [x] Add a short API client mock flow GIF.
+- [x] Summarize the media manifest in a release notes template.
+- [x] Add an in-app sanitized report export history panel.

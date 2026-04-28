@@ -7,6 +7,20 @@ import AppKit
 import UIKit
 #endif
 
+struct ReportExportHistoryItem: Identifiable, Codable, Equatable {
+    enum Status: String, Codable {
+        case prepared
+        case exported
+        case failed
+    }
+
+    let id: UUID
+    let createdAt: Date
+    let status: Status
+    let title: String
+    let detail: String
+}
+
 final class LabStore: ObservableObject {
     @Published var console = ""
     @Published var isPremiumEnabled = false
@@ -16,12 +30,14 @@ final class LabStore: ObservableObject {
     @Published var report = ""
     @Published var sanitizedReport = ""
     @Published var reportExportStatus = ""
+    @Published var sanitizedReportExportHistory: [ReportExportHistoryItem] = []
 
     private let defaults: UserDefaults
     private let weakKey: UInt8 = 0x42
     private let progressKey = "lab.progress.completedChallengeIDs"
     private let notesKey = "lab.progress.notes"
     private let serverClaimKey = "lab.premium.serverClaim"
+    private let reportExportHistoryKey = "lab.report.sanitizedExportHistory"
     private let observationProbe = LabObservationProbe.shared
     private let entitlementAuthority = SimulatedEntitlementAuthority()
     private var lastPayload = ""
@@ -30,6 +46,10 @@ final class LabStore: ObservableObject {
         self.defaults = defaults
         completedChallengeIDs = Set(defaults.stringArray(forKey: progressKey) ?? [])
         notes = defaults.dictionary(forKey: notesKey) as? [String: String] ?? [:]
+        sanitizedReportExportHistory = Self.loadSanitizedReportExportHistory(
+            from: defaults,
+            key: reportExportHistoryKey
+        )
         applyLaunchDemoIfNeeded()
     }
 
@@ -175,14 +195,29 @@ final class LabStore: ObservableObject {
         """
 
         reportExportStatus = "Sanitized report ready for Markdown export."
+        recordSanitizedReportExportHistory(
+            status: .prepared,
+            title: "Prepared sanitized report",
+            detail: "\(completed)/\(challenges.count) labs ready for Markdown export."
+        )
     }
 
     func handleSanitizedReportExport(_ result: Result<URL, Error>) {
         switch result {
         case .success(let url):
             reportExportStatus = "Exported sanitized Markdown report: \(url.lastPathComponent)"
+            recordSanitizedReportExportHistory(
+                status: .exported,
+                title: "Exported Markdown report",
+                detail: url.lastPathComponent
+            )
         case .failure(let error):
             reportExportStatus = "Sanitized report export failed: \(error.localizedDescription)"
+            recordSanitizedReportExportHistory(
+                status: .failed,
+                title: "Export failed",
+                detail: error.localizedDescription
+            )
         }
     }
 
@@ -544,6 +579,45 @@ final class LabStore: ObservableObject {
         defaults.set(notes, forKey: notesKey)
     }
 
+    private static func loadSanitizedReportExportHistory(
+        from defaults: UserDefaults,
+        key: String
+    ) -> [ReportExportHistoryItem] {
+        guard let data = defaults.data(forKey: key),
+              let history = try? JSONDecoder().decode([ReportExportHistoryItem].self, from: data)
+        else {
+            return []
+        }
+
+        return history
+    }
+
+    private func recordSanitizedReportExportHistory(
+        status: ReportExportHistoryItem.Status,
+        title: String,
+        detail: String
+    ) {
+        let item = ReportExportHistoryItem(
+            id: UUID(),
+            createdAt: Date(),
+            status: status,
+            title: title,
+            detail: sanitizedFreeformText(detail)
+        )
+
+        sanitizedReportExportHistory.insert(item, at: 0)
+        sanitizedReportExportHistory = Array(sanitizedReportExportHistory.prefix(8))
+        persistSanitizedReportExportHistory()
+    }
+
+    private func persistSanitizedReportExportHistory() {
+        guard let data = try? JSONEncoder().encode(sanitizedReportExportHistory) else {
+            return
+        }
+
+        defaults.set(data, forKey: reportExportHistoryKey)
+    }
+
     private func displaySignedClaim(_ value: String) -> String {
         replacingMatches(
             in: value,
@@ -637,6 +711,11 @@ final class LabStore: ObservableObject {
 
         if exported {
             reportExportStatus = "Exported sanitized Markdown report: iOSAppHackingLab-Sanitized-Study-Report.md"
+            recordSanitizedReportExportHistory(
+                status: .exported,
+                title: "Exported Markdown report",
+                detail: "iOSAppHackingLab-Sanitized-Study-Report.md"
+            )
         }
     }
 }
